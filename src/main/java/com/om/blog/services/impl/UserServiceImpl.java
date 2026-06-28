@@ -43,25 +43,25 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    private User dtoToUser(UserDto user)
+    private User dtoToUser(UserDto userDto)
     {
         User user1 = new User();
-        user1.setId(user.getId());
-        user1.setName(user.getName());
-        user1.setEmail(user.getEmail());
-        user1.setPassword(user.getPassword());
-        user1.setAbout(user.getAbout());
+        user1.setId(userDto.getId());
+        user1.setName(userDto.getName());
+        user1.setEmail(userDto.getEmail());
+        user1.setPassword(userDto.getPassword());
+        user1.setAbout(userDto.getAbout());
         return  user1;
     }
 
-    private UserDto userToDto(User dto)
+    private UserDto userToDto(User user)
     {
         UserDto userDto = new UserDto();
-        userDto.setId(dto.getId());
-        userDto.setName(dto.getName());
-        userDto.setEmail(dto.getEmail());
-        userDto.setPassword(dto.getPassword());
-        userDto.setAbout(dto.getAbout());
+        userDto.setId(user.getId());
+        userDto.setName(user.getName());
+        userDto.setEmail(user.getEmail());
+        userDto.setPassword(user.getPassword());
+        userDto.setAbout(user.getAbout());
         return  userDto;
     }
 }
