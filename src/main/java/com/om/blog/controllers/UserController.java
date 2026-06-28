@@ -1,5 +1,6 @@
 package com.om.blog.controllers;
 
+import com.om.blog.entities.User;
 import com.om.blog.payloads.UserDto;
 import com.om.blog.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +21,12 @@ public class UserController
     {
         UserDto dto = userService.createUser(userDto);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, @PathVariable("userId") Integer uid)
+    {
+        UserDto dto = userService.updateUser(userDto,uid);
+        return ResponseEntity.ok(dto);
     }
 }
