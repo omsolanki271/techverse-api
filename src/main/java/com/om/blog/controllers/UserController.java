@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController
@@ -15,7 +17,7 @@ public class UserController
     @Autowired
     private UserService userService;
 
-
+    // post - create user
     @PostMapping("/")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto)
     {
@@ -23,10 +25,19 @@ public class UserController
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
     }
 
+    // put - update user
     @PutMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, @PathVariable("userId") Integer uid)
     {
         UserDto dto = userService.updateUser(userDto,uid);
         return ResponseEntity.ok(dto);
+    }
+
+    // delete - delete user
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer userId)
+    {
+            userService.deleteUser(userId);
+            return new ResponseEntity(Map.of("message","User deleted Successfully"),HttpStatus.OK);
     }
 }
