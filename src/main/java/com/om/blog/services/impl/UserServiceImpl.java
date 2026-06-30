@@ -5,6 +5,7 @@ import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.UserDto;
 import com.om.blog.repositories.UserRepo;
 import com.om.blog.services.UserService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public UserDto createUser(UserDto userDto) {
