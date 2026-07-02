@@ -3,13 +3,24 @@ package com.om.blog.exceptions;
 import com.om.blog.payloads.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.View;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler{
+
+    private final View error;
+
+    public GlobalExceptionHandler(View error) {
+        this.error = error;
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse> resourceNotFoundExceptionHandler(ResourceNotFoundException ex)
@@ -32,16 +43,17 @@ public class GlobalExceptionHandler{
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse> methodArgumentNotValidException(MethodArgumentNotValidException ex)
+    public ResponseEntity<Map<String,String>> methodArgumentNotValidException(MethodArgumentNotValidException ex)
     {
-        String msg = "Validation failed";
+        Map<String,String> response = new HashMap<>();
 
-        if (ex.getBindingResult().getFieldError() != null) {
-            msg = ex.getBindingResult()
-                    .getFieldError()
-                    .getDefaultMessage();
+        for(FieldError error : ex.getBindingResult().getFieldErrors())
+        {
+            String fieldName= error.getField();
+            String message = error.getDefaultMessage();
+            response.put(fieldName,message);
         }
-        ApiResponse response = new ApiResponse(msg , false);
-        return  new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+
+        return  new ResponseEntity<Map<String,String>>(response,HttpStatus.BAD_REQUEST);
     }
 }
