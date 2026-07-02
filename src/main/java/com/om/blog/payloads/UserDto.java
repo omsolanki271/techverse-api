@@ -10,15 +10,19 @@ public class UserDto {
     private Integer id;
 
     @NotBlank(message = "Name is required")
+    @Size(min = 4,message = "Name must be at least 4 characters long")
     private String name;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email address")
+    @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String email;
 
     @NotBlank(message = "Password is required")
+    @Size(min = 6 , max = 15 , message = "Password must be between 6 and 15 characters")
     private String password;
 
     @NotBlank(message = "About is required")
+    @Size(max = 500, message = "About cannot exceed 500 characters")
     private String about;
 }
