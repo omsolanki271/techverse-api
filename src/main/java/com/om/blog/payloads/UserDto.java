@@ -20,6 +20,10 @@ public class UserDto {
 
     @NotBlank(message = "Password is required")
     @Size(min = 6 , max = 15 , message = "Password must be between 6 and 15 characters")
+    @Pattern(
+            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,15}$",
+            message = "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be 8 to 15 characters long"
+    )
     private String password;
 
     @NotBlank(message = "About is required")
