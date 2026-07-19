@@ -37,6 +37,7 @@ public class UserServiceImpl implements UserService {
         return userToDto(upUserToDto);
     }
 
+    // after find update here
     private User updateUserFromDto(User updateUser, UserDto userDto) {
         updateUser.setName(userDto.getName());
         updateUser.setEmail(userDto.getEmail());
