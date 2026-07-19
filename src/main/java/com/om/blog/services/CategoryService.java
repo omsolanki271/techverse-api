@@ -1,4 +1,4 @@
-package com.om.blog.services.impl;
+package com.om.blog.services;
 
 import com.om.blog.payloads.CategoryDto;
 
