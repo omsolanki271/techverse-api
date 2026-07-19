@@ -1,6 +1,7 @@
 package com.om.blog.services.impl;
 
 import com.om.blog.entities.Category;
+import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.CategoryDto;
 import com.om.blog.repositories.CategoryRepo;
 import com.om.blog.services.CategoryService;
@@ -29,7 +30,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto updateCategory(CategoryDto categoryDto, Integer categoryId) {
-        return null;
+        Category category =   this.categoryRepo.findById(categoryId).orElseThrow(()-> new ResourceNotFoundException("Category ","Category Id" , categoryId));
+
+        // only two value pass so here not use modelmapper
+        category.setCategoryTitle(categoryDto.getCategoryTitle());
+        category.setCategoryDescription(categoryDto.getCategoryDescription());
+
+        Category category1 =  categoryRepo.save(category);
+        return this.modelMapper.map(category1 , CategoryDto.class);
     }
 
     @Override
