@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/category/")
 public class CategoryController {
@@ -38,7 +40,19 @@ public class CategoryController {
     public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Integer categoryId)
     {
         categoryService.deleteCategory(categoryId);
-        return new ResponseEntity<>(new ApiResponse("Category deleted Successfully .. !", true),HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse("Category deleted Successfully.", true),HttpStatus.OK);
     }
 
+    @GetMapping("/{categoryId}")
+    public ResponseEntity<CategoryDto> getCategory(@PathVariable Integer categoryId)
+    {
+        CategoryDto fetchCategory = categoryService.getCategory(categoryId);
+        return new ResponseEntity<>(fetchCategory,HttpStatus.OK);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<CategoryDto>> getAllCategories()
+    {
+        return new ResponseEntity<>(categoryService.getAllCategories(),HttpStatus.OK);
+    }
 }

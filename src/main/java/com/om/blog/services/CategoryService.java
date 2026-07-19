@@ -16,7 +16,7 @@ public interface CategoryService {
     void deleteCategory(Integer categoryId);
 
     //get
-    CategoryDto getCategory(CategoryDto categoryDto , Integer categoryId);
+    CategoryDto getCategory(Integer categoryId);
 
     //all category get
     List<CategoryDto> getAllCategories();

@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto getCategory(CategoryDto categoryDto, Integer categoryId) {
+    public CategoryDto getCategory(Integer categoryId) {
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categroy " , "Category Id" , categoryId));
         return this.modelMapper.map(category , CategoryDto.class);
     }
