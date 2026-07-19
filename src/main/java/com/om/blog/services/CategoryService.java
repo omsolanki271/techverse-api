@@ -5,19 +5,20 @@ import com.om.blog.payloads.CategoryDto;
 import java.util.List;
 
 public interface CategoryService {
+
     //create
-    public CategoryDto createCategory(CategoryDto categoryDto);
+    CategoryDto createCategory(CategoryDto categoryDto);
 
     //update
-    public  CategoryDto updateCategory(CategoryDto categoryDto , Integer categoryId);
+    CategoryDto updateCategory(CategoryDto categoryDto , Integer categoryId);
 
     //delete
-    public void deleteCategory(Integer categoryId);
+    void deleteCategory(Integer categoryId);
 
     //get
-    public CategoryDto getCategory(CategoryDto categoryDto , Integer categoryId);
+    CategoryDto getCategory(CategoryDto categoryDto , Integer categoryId);
 
     //all category get
-    public List<CategoryDto> getAllCategory();
+    List<CategoryDto> getAllCategories();
 
 }

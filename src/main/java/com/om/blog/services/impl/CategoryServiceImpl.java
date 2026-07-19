@@ -1,14 +1,30 @@
 package com.om.blog.services.impl;
 
+import com.om.blog.entities.Category;
 import com.om.blog.payloads.CategoryDto;
+import com.om.blog.repositories.CategoryRepo;
 import com.om.blog.services.CategoryService;
+import org.modelmapper.ModelMapper;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class CategoryServiceImpl implements CategoryService {
+
+    @Autowired
+    private CategoryRepo categoryRepo;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
-        return null;
+        Category category =  this.modelMapper.map(categoryDto, Category.class);
+        Category saved =  this.categoryRepo.save(category);
+        return this.modelMapper.map(saved,CategoryDto.class);
     }
 
     @Override
@@ -27,7 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getAllCategory() {
+    public List<CategoryDto> getAllCategories() {
         return List.of();
     }
 }
