@@ -1,7 +1,9 @@
 package com.om.blog.controllers;
 
+import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.CategoryDto;
 import com.om.blog.services.CategoryService;
+import com.om.blog.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
+
 
     //create category api
     @PostMapping("/")
@@ -30,4 +33,12 @@ public class CategoryController {
         CategoryDto updateCategory = categoryService.updateCategory(categoryDto, categoryId);
         return  new ResponseEntity<>(updateCategory,HttpStatus.OK);
     }
+
+    @DeleteMapping("/{categoryId}")
+    public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Integer categoryId)
+    {
+        categoryService.deleteCategory(categoryId);
+        return new ResponseEntity<>(new ApiResponse("Category deleted Successfully .. !", true),HttpStatus.OK);
+    }
+
 }
