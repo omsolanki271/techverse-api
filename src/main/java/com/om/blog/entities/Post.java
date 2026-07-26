@@ -1,6 +1,7 @@
 package com.om.blog.entities;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -24,6 +25,7 @@ public class Post {
     private String imageName;
 
     @Column(nullable = false)
+    @CurrentTimestamp
     private LocalDateTime addedDate;
 
     @ManyToOne
