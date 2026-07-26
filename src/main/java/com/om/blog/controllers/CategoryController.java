@@ -3,7 +3,6 @@ package com.om.blog.controllers;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.CategoryDto;
 import com.om.blog.services.CategoryService;
-import com.om.blog.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,12 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/category/")
+@RequestMapping("/api/categories")
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
-
 
     //create category api
     @PostMapping("/")

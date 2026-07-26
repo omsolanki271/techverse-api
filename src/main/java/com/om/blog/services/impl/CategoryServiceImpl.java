@@ -42,13 +42,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategory(Integer categoryId) {
-        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categroy " , "Category Id" , categoryId));
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category" , "Category Id" , categoryId));
         this.categoryRepo.delete(category);
     }
 
     @Override
     public CategoryDto getCategory(Integer categoryId) {
-        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Categroy " , "Category Id" , categoryId));
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category" , "Category Id" , categoryId));
         return this.modelMapper.map(category , CategoryDto.class);
     }
 
