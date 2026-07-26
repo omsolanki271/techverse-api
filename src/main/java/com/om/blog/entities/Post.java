@@ -26,6 +26,11 @@ public class Post {
     @Column(nullable = false)
     private LocalDateTime addedDate;
 
-/*    private Category category;
-    private User user;*/
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
