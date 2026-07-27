@@ -1,5 +1,6 @@
 package com.om.blog.payloads;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.om.blog.entities.Category;
 import com.om.blog.entities.User;
 import lombok.Getter;
@@ -13,8 +14,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class PostDto {
 
+    private Integer postId;
     private String title;
     private String content;
     private String imageName;
     private LocalDateTime addedDate;
+    private CategoryDto category;
+    private UserDto user;
 }

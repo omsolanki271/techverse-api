@@ -1,4 +1,5 @@
 package com.om.blog.payloads;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class UserDto {
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,15}$",
             message = "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be 8 to 15 characters long"
     )
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @NotBlank(message = "About is required")
