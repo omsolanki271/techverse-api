@@ -1,16 +1,48 @@
 package com.om.blog.services.impl;
 
+import com.om.blog.entities.Category;
 import com.om.blog.entities.Post;
+import com.om.blog.entities.User;
+import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.PostDto;
+import com.om.blog.repositories.CategoryRepo;
+import com.om.blog.repositories.PostRepo;
+import com.om.blog.repositories.UserRepo;
 import com.om.blog.services.PostService;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class PostServiceImpl implements PostService {
 
+    @Autowired
+    private PostRepo postRepo;
+
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private CategoryRepo categoryRepo;
+
+    @Autowired
+    private UserRepo userRepo;
+
     @Override
-    public Post createPost(PostDto postDto) {
-        return null;
+    public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId) {
+
+        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
+        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User" , "User id" , userId));
+
+        Post post = this.modelMapper.map(postDto, Post.class);
+
+        post.setImageName("default.png");
+        post.setCategory(category);
+        post.setUser(user);
+        Post savePost = postRepo.save(post);
+        return this.modelMapper.map(savePost , PostDto.class);
     }
 
     @Override
@@ -43,3 +75,4 @@ public class PostServiceImpl implements PostService {
         return List.of();
     }
 }
+
