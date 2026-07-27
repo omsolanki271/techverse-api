@@ -9,6 +9,15 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@JsonPropertyOrder({
+        "postId",
+        "title",
+        "content",
+        "imageName",
+        "addedDate",
+        "category",
+        "user"
+})
 @Getter
 @Setter
 @NoArgsConstructor
