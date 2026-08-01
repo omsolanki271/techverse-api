@@ -1,5 +1,6 @@
 package com.om.blog.controllers;
 
+import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.services.PostService;
 import jakarta.validation.Valid;
@@ -23,4 +24,12 @@ public class PostController {
         return  new ResponseEntity<>(createPost , HttpStatus.CREATED);
     }
 
+
+    //delete
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId )
+    {
+        postService.deletePost(postId);
+        return  new ResponseEntity<>(new ApiResponse("Post deleted Successfully ", true),HttpStatus.OK );
+    }
 }

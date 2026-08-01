@@ -52,7 +52,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void deletePost(Integer postId) {
-
+        Post findId = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "PostId", postId));
+        postRepo.delete(findId);
     }
 
     @Override
