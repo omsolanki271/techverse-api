@@ -1,5 +1,6 @@
 package com.om.blog.controllers;
 
+import com.om.blog.entities.Post;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.services.PostService;
@@ -34,6 +35,21 @@ public class PostController {
         return  new ResponseEntity<>(new ApiResponse("Post deleted Successfully ", true),HttpStatus.OK );
     }
 
+    // Get post by id
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDto> getPostById(@PathVariable Integer postId) {
+
+        return ResponseEntity.ok(postService.getPostById(postId));
+    }
+
+    // Get posts
+    @GetMapping("/")
+    public ResponseEntity<List<PostDto>> getAllPosts()
+    {
+        final List<PostDto> allPost = postService.getAllPost();
+        return new ResponseEntity<>(allPost, HttpStatus.OK);
+    }
+
     // get post by User
     @GetMapping("/user/{userId}/posts")
     public ResponseEntity<List<PostDto>> getPostsByUser(
@@ -50,5 +66,4 @@ public class PostController {
         List<PostDto> posts = postService.getPostByCategory(categoryId);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
-
 }
