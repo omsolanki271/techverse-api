@@ -46,8 +46,18 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post updatePost(PostDto postDto , Integer postId) {
-        return null;
+    public PostDto updatePost(PostDto postDto , Integer postId) {
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Post", "Post Id", postId));
+
+        post.setTitle(postDto.getTitle());
+        post.setContent(postDto.getContent());
+        post.setImageName(postDto.getImageName());
+
+        Post updatedPost = postRepo.save(post);
+
+        return modelMapper.map(updatedPost, PostDto.class);
     }
 
     @Override
@@ -85,7 +95,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> getPostByUser(Integer userId) {
 
-        User user = this.userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
+        User user = this.userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
         List<Post> posts = this.postRepo.findByUser(user);
         return posts.stream()
                 .map(post -> this.modelMapper.map(post, PostDto.class))
