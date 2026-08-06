@@ -66,4 +66,14 @@ public class PostController {
         List<PostDto> posts = postService.getPostByCategory(categoryId);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostDto> updatePost(
+            @Valid @RequestBody PostDto postDto,
+            @PathVariable Integer postId) {
+
+        PostDto updatedPost = postService.updatePost(postDto, postId);
+
+        return ResponseEntity.ok(updatedPost);
+    }
 }
