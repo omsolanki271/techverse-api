@@ -28,9 +28,12 @@ public class PostController {
 
     // Get all posts
     @GetMapping("/")
-    public ResponseEntity<List<PostDto>> getAllPosts()
+    public ResponseEntity<List<PostDto>> getAllPosts(
+            @RequestParam(value = "pageNumber" , defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize" , defaultValue = "10", required = false) Integer pageSize
+    )
     {
-        List<PostDto> allPosts = postService.getAllPosts();
+        List<PostDto> allPosts = postService.getAllPosts(pageNumber,pageSize);
         return new ResponseEntity<>(allPosts, HttpStatus.OK);
     }
 
@@ -76,6 +79,4 @@ public class PostController {
         List<PostDto> posts = postService.getPostByCategory(categoryId);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
-
-
 }
