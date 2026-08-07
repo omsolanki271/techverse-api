@@ -1,6 +1,5 @@
 package com.om.blog.controllers;
 
-import com.om.blog.entities.Post;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.services.PostService;
@@ -27,12 +26,12 @@ public class PostController {
         return  new ResponseEntity<>(createPost , HttpStatus.CREATED);
     }
 
-    //delete
-    @DeleteMapping("/{postId}")
-    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId )
+    // Get all posts
+    @GetMapping("/")
+    public ResponseEntity<List<PostDto>> getAllPosts()
     {
-        postService.deletePost(postId);
-        return  new ResponseEntity<>(new ApiResponse("Post deleted Successfully ", true),HttpStatus.OK );
+        List<PostDto> allPosts = postService.getAllPosts();
+        return new ResponseEntity<>(allPosts, HttpStatus.OK);
     }
 
     // Get post by id
@@ -40,31 +39,6 @@ public class PostController {
     public ResponseEntity<PostDto> getPostById(@PathVariable Integer postId) {
 
         return ResponseEntity.ok(postService.getPostById(postId));
-    }
-
-    // Get posts
-    @GetMapping("/")
-    public ResponseEntity<List<PostDto>> getAllPosts()
-    {
-        final List<PostDto> allPost = postService.getAllPost();
-        return new ResponseEntity<>(allPost, HttpStatus.OK);
-    }
-
-    // get post by User
-    @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<List<PostDto>> getPostsByUser(
-            @PathVariable Integer userId) {
-
-        List<PostDto> posts = postService.getPostByUser(userId);
-        return new ResponseEntity<>(posts ,HttpStatus.OK);
-    }
-
-    // Get posts by category
-    @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<PostDto>> getPostsByCategory(
-            @PathVariable Integer categoryId) {
-        List<PostDto> posts = postService.getPostByCategory(categoryId);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
     @PutMapping("/{postId}")
@@ -76,4 +50,32 @@ public class PostController {
 
         return ResponseEntity.ok(updatedPost);
     }
+
+    //delete
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<ApiResponse> deletePost(@PathVariable Integer postId )
+    {
+        postService.deletePost(postId);
+        return  new ResponseEntity<>(new ApiResponse("Post deleted Successfully ", true),HttpStatus.OK );
+    }
+
+
+    // get post by User
+    @GetMapping("/user/{userId}/posts")
+    public ResponseEntity<List<PostDto>> getPostsByUser(
+            @PathVariable Integer userId) {
+
+        List<PostDto> posts = postService.getPostByUser(userId);
+        return new ResponseEntity<>(posts ,HttpStatus.OK);
+    }
+
+    // Get posts by category
+    @GetMapping("/category/{categoryId}/posts")
+    public ResponseEntity<List<PostDto>> getPostsByCategory(
+            @PathVariable Integer categoryId) {
+        List<PostDto> posts = postService.getPostByCategory(categoryId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+
 }
