@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/posts")
@@ -90,5 +92,16 @@ public class PostController {
             ) {
         PostResponse postByCategory = postService.getPostByCategory(categoryId, pageNumber, pageSize,sortBy,sortDirection);
         return new ResponseEntity<>(postByCategory, HttpStatus.OK);
+    }
+
+    //search
+
+    @GetMapping("/search/{keywords}")
+    public ResponseEntity<List<PostDto>> searchPostByTitle(
+        @PathVariable("keywords") String keywords
+    )
+    {
+        List<PostDto> postDtos = postService.searchPosts(keywords);
+        return new ResponseEntity<>(postDtos,HttpStatus.OK);
     }
 }

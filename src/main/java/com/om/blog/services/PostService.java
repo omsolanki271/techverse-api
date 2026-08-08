@@ -25,6 +25,6 @@ public interface PostService {
     // Get posts by user with pagination
     PostResponse getPostByUser(Integer userId, Integer pageNumber, Integer pageSize, String sortBy , String sortDirection);
 
-
+    //search
     List<PostDto> searchPosts(String keyword);
 }
