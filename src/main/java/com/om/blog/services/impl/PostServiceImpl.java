@@ -1,5 +1,6 @@
 package com.om.blog.services.impl;
 
+import com.om.blog.config.AppConstants;
 import com.om.blog.entities.Category;
 import com.om.blog.entities.Post;
 import com.om.blog.entities.User;
@@ -43,7 +44,7 @@ public class PostServiceImpl implements PostService {
 
         Post post = this.modelMapper.map(postDto, Post.class);
 
-        post.setImageName("default.png");
+        post.setImageName(AppConstants.DEFAULT_IMAGE);
         post.setCategory(category);
         post.setUser(user);
         Post savePost = postRepo.save(post);
