@@ -72,9 +72,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getAllPosts(Integer pageNumber , Integer pageSize , String sortBy) {
+    public PostResponse getAllPosts(Integer pageNumber , Integer pageSize , String sortBy , String sortDirection) {
 
-        Pageable pageable  = PageRequest.of(pageNumber,pageSize,Sort.by(sortBy));
+        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+        Pageable pageable  = PageRequest.of(pageNumber,pageSize,sort);
+
         Page<Post> pagePost = postRepo.findAll(pageable);
 
         return createPostResponse(pagePost);
@@ -87,15 +89,16 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getPostByCategory(Integer categoryId, Integer pageNumber,
-                                          Integer pageSize)  {
-//        System.out.println("Category Id = " + categoryId);
+    public PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize , String sortBy , String sortDirection)  {
 
+//        System.out.println("Category Id = " + categoryId);
         Category category = categoryRepo.findById(categoryId)
                 .orElseThrow(() ->  new ResourceNotFoundException("Category", "Category Id", categoryId));
 //       System.out.println("Category Found = " + category.getCategoryTitle());
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize , sort);
 
         Page<Post> pagePost = postRepo.findByCategory(category, pageable);
 
@@ -103,14 +106,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse getPostByUser(Integer userId,
-                                      Integer pageNumber,
-                                      Integer pageSize)
+    public PostResponse getPostByUser(Integer userId, Integer pageNumber, Integer pageSize ,  String sortBy , String sortDirection)
     {
 
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
-        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize , sort);
 
         Page<Post> pagePost = postRepo.findByUser(user, pageable);
 

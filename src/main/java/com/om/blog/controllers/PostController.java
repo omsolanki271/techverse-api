@@ -31,10 +31,11 @@ public class PostController {
     public ResponseEntity<PostResponse> getAllPosts(
             @RequestParam(value = "pageNumber" , defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize" , defaultValue = "10", required = false) Integer pageSize,
-            @RequestParam(value = "sortBy" , defaultValue = "postId" , required = false) String sortBy
+            @RequestParam(value = "sortBy" , defaultValue = "postId" , required = false) String sortBy,
+            @RequestParam(value = "sortDirection" , defaultValue = "asc" , required = false) String sortDirection
     )
     {
-        PostResponse postResponse = postService.getAllPosts(pageNumber,pageSize,sortBy);
+        PostResponse postResponse = postService.getAllPosts(pageNumber,pageSize,sortBy,sortDirection);
         return new ResponseEntity<>(postResponse, HttpStatus.OK);
     }
 
@@ -69,10 +70,12 @@ public class PostController {
     public ResponseEntity<PostResponse> getPostsByUser(
             @PathVariable Integer userId,
             @RequestParam(value = "pageNumber" , defaultValue = "0", required = false) Integer pageNumber,
-            @RequestParam(value = "pageSize" , defaultValue = "10", required = false) Integer pageSize
+            @RequestParam(value = "pageSize" , defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy" , defaultValue = "postId" , required = false) String sortBy,
+            @RequestParam(value = "sortDirection" , defaultValue = "asc" , required = false) String sortDirection
             ) {
 
-        PostResponse postByUser = postService.getPostByUser(userId, pageNumber, pageSize);
+        PostResponse postByUser = postService.getPostByUser(userId, pageNumber, pageSize, sortBy, sortDirection);
         return new ResponseEntity<>(postByUser ,HttpStatus.OK);
     }
 
@@ -81,9 +84,11 @@ public class PostController {
     public ResponseEntity<PostResponse> getPostsByCategory(
             @PathVariable Integer categoryId,
             @RequestParam(value = "pageNumber" , defaultValue = "0" , required = false) Integer pageNumber,
-            @RequestParam(value = "pageSize" , defaultValue = "10" , required = false) Integer pageSize
+            @RequestParam(value = "pageSize" , defaultValue = "10" , required = false) Integer pageSize,
+            @RequestParam(value = "sortBy" , defaultValue = "postId" , required = false) String sortBy,
+            @RequestParam(value = "sortDirection" , defaultValue = "asc" , required = false) String sortDirection
             ) {
-        PostResponse postByCategory = postService.getPostByCategory(categoryId, pageNumber, pageSize);
+        PostResponse postByCategory = postService.getPostByCategory(categoryId, pageNumber, pageSize,sortBy,sortDirection);
         return new ResponseEntity<>(postByCategory, HttpStatus.OK);
     }
 }
