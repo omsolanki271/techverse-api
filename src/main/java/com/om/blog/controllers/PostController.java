@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -66,18 +65,24 @@ public class PostController {
 
     // get post by User
     @GetMapping("/user/{userId}/posts")
-    public ResponseEntity<List<PostDto>> getPostsByUser(
-            @PathVariable Integer userId) {
+    public ResponseEntity<PostResponse> getPostsByUser(
+            @PathVariable Integer userId,
+            @RequestParam(value = "pageNumber" , defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize" , defaultValue = "10", required = false) Integer pageSize
+            ) {
 
-        List<PostDto> posts = postService.getPostByUser(userId);
-        return new ResponseEntity<>(posts ,HttpStatus.OK);
+        PostResponse postByUser = postService.getPostByUser(userId, pageNumber, pageSize);
+        return new ResponseEntity<>(postByUser ,HttpStatus.OK);
     }
 
     // Get posts by category
     @GetMapping("/category/{categoryId}/posts")
-    public ResponseEntity<List<PostDto>> getPostsByCategory(
-            @PathVariable Integer categoryId) {
-        List<PostDto> posts = postService.getPostByCategory(categoryId);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+    public ResponseEntity<PostResponse> getPostsByCategory(
+            @PathVariable Integer categoryId,
+            @RequestParam(value = "pageNumber" , defaultValue = "0" , required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize" , defaultValue = "10" , required = false) Integer pageSize
+            ) {
+        PostResponse postByCategory = postService.getPostByCategory(categoryId, pageNumber, pageSize);
+        return new ResponseEntity<>(postByCategory, HttpStatus.OK);
     }
 }

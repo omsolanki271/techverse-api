@@ -14,13 +14,17 @@ public interface PostService {
 
     void deletePost(Integer postId);
 
+    // Get all posts with pagination
     PostResponse getAllPosts(Integer pageNumber , Integer pageSize);
 
     PostDto getPostById(Integer postId);
 
-    List<PostDto> getPostByCategory(Integer categoryId);
+    // Get posts by category with pagination
+    PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize);
 
-    List<PostDto> getPostByUser(Integer userId);
+    // Get posts by user with pagination
+    PostResponse getPostByUser(Integer userId, Integer pageNumber, Integer pageSize);
+
 
     List<PostDto> searchPosts(String keyword);
 }

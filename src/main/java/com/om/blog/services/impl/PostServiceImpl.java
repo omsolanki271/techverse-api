@@ -86,28 +86,34 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostDto> getPostByCategory(Integer categoryId) {
+    public PostResponse getPostByCategory(Integer categoryId, Integer pageNumber,
+                                          Integer pageSize)  {
 //        System.out.println("Category Id = " + categoryId);
 
         Category category = categoryRepo.findById(categoryId)
                 .orElseThrow(() ->  new ResourceNotFoundException("Category", "Category Id", categoryId));
 //       System.out.println("Category Found = " + category.getCategoryTitle());
 
-        List<Post> posts = postRepo.findByCategory(category);
-        return posts.stream()
-                .map(post -> modelMapper.map(post, PostDto.class))
-                .toList();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<Post> pagePost = postRepo.findByCategory(category, pageable);
+
+        return createPostResponse(pagePost);
     }
 
     @Override
-    public List<PostDto> getPostByUser(Integer userId) {
+    public PostResponse getPostByUser(Integer userId,
+                                      Integer pageNumber,
+                                      Integer pageSize)
+    {
 
         User user = this.userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
-        List<Post> posts = this.postRepo.findByUser(user);
-        return posts.stream()
-                .map(post -> this.modelMapper.map(post, PostDto.class))
-                .toList();
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        Page<Post> pagePost = postRepo.findByUser(user, pageable);
+
+        return createPostResponse(pagePost);
     }
 
     private PostResponse createPostResponse(Page<Post> pagePost) {
