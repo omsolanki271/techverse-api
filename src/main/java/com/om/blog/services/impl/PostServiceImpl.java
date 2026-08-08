@@ -75,16 +75,8 @@ public class PostServiceImpl implements PostService {
 
         Pageable pageable  = PageRequest.of(pageNumber,pageSize);
         Page<Post> pagePost = postRepo.findAll(pageable);
-        List<Post> allPosts = pagePost.getContent();
-        List<PostDto> postDtos = allPosts.stream().map(post -> modelMapper.map(post, PostDto.class)).toList();
-        PostResponse postResponse = new PostResponse();
-        postResponse.setContent(postDtos);
-        postResponse.setPageNumber(pagePost.getNumber());
-        postResponse.setPageSize(pagePost.getSize());
-        postResponse.setTotalElements(pagePost.getTotalElements());
-        postResponse.setTotalPages(pagePost.getTotalPages());
-        postResponse.setLastePage(pagePost.isLast());
-        return postResponse;
+
+        return createPostResponse(pagePost);
     }
 
     @Override
@@ -116,6 +108,25 @@ public class PostServiceImpl implements PostService {
         return posts.stream()
                 .map(post -> this.modelMapper.map(post, PostDto.class))
                 .toList();
+    }
+
+    private PostResponse createPostResponse(Page<Post> pagePost) {
+
+        List<PostDto> postDtos = pagePost.getContent()
+                .stream()
+                .map(post -> modelMapper.map(post, PostDto.class))
+                .toList();
+
+        PostResponse postResponse = new PostResponse();
+
+        postResponse.setContent(postDtos);
+        postResponse.setPageNumber(pagePost.getNumber());
+        postResponse.setPageSize(pagePost.getSize());
+        postResponse.setTotalElements(pagePost.getTotalElements());
+        postResponse.setTotalPages(pagePost.getTotalPages());
+        postResponse.setLastPage(pagePost.isLast());
+
+        return postResponse;
     }
 
     @Override
