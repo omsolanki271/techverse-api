@@ -139,10 +139,10 @@ public class PostServiceImpl implements PostService {
         return postResponse;
     }
 
-    // work like query 
+    // work like query
     @Override
     public List<PostDto> searchPosts(String keyword) {
-        List<Post> byTitleContaining = this.postRepo.findByTitleContaining(keyword);
+        List<Post> byTitleContaining = this.postRepo.findByTitleContainingOrContentContaining(keyword,keyword);
         return byTitleContaining.stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList();
     }
 }
