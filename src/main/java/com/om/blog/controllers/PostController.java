@@ -154,13 +154,42 @@ public class PostController {
     }
     //method to serve files
 
-    @GetMapping(value = "/image/{imageName}",produces = MediaType.IMAGE_JPEG_VALUE)
+
+// get to display post image with url
+
+    @GetMapping("/image/{imageName}")
     public void downloadImage(
             @PathVariable("imageName") String imageName,
             HttpServletResponse response
     ) throws IOException {
         InputStream resource = fileService.getResource(path, imageName);
-        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+        String contentType = getContentType(imageName);
+        response.setContentType(contentType);
         StreamUtils.copy(resource,response.getOutputStream());
     }
+
+    private String getContentType(String imageName) {
+        String extension =
+                imageName.substring(
+                        imageName.lastIndexOf(".")
+                ).toLowerCase();
+
+        return switch (extension) {
+            case ".jpg", ".jpeg" ->
+                    MediaType.IMAGE_JPEG_VALUE;
+
+            case ".png" ->
+                    MediaType.IMAGE_PNG_VALUE;
+
+            case ".gif" ->
+                    MediaType.IMAGE_GIF_VALUE;
+
+            case ".webp" ->
+                    "image/webp";
+
+            default ->
+                    MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        };
+    }
+
 }
