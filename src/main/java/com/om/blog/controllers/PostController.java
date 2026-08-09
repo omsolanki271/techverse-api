@@ -7,6 +7,7 @@ import com.om.blog.payloads.PostResponse;
 import com.om.blog.services.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +22,18 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+
+    //get value from application properties
+    @Value("${project.image}")
+    private String path;
+
     //create
     @PostMapping("/user/{userId}/category/{categoryId}/posts")
-    public ResponseEntity<PostDto> createPost(@Valid @RequestBody PostDto postDto , @PathVariable Integer userId , @PathVariable Integer categoryId )
+    public ResponseEntity<PostDto> createPost(
+            @Valid @RequestBody PostDto postDto ,
+            @PathVariable Integer userId ,
+            @PathVariable Integer categoryId
+    )
     {
         PostDto createPost = postService.createPost(postDto, userId, categoryId);
         return  new ResponseEntity<>(createPost , HttpStatus.CREATED);
@@ -102,7 +112,9 @@ public class PostController {
             @RequestParam String keyword
     )
     {
-        List<PostDto> postDtos = postService.searchPosts(keyword);
-        return new ResponseEntity<>(postDtos,HttpStatus.OK);
+        List<PostDto> postDto = postService.searchPosts(keyword);
+        return new ResponseEntity<>(postDto,HttpStatus.OK);
     }
+
+
 }
