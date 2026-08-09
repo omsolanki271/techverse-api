@@ -43,4 +43,21 @@ public class CommentController {
     {
         return  new ResponseEntity<>(commentService.getAllComment(),HttpStatus.OK);
     }
+
+    @GetMapping("/{commentId}")
+    public ResponseEntity<CommentDto> getCommentById(
+            @PathVariable Integer commentId
+    )
+    {
+        return  new ResponseEntity<>(commentService.getCommentById(commentId),HttpStatus.OK);
+    }
+
+    // Get comments by post
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<CommentDto>> getCommentsByPost(
+            @PathVariable Integer postId
+    ) {
+        List<CommentDto> comments = commentService.getCommentsByPost(postId);
+        return new ResponseEntity<>(comments, HttpStatus.OK);
+    }
 }
