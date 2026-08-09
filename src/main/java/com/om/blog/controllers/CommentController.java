@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/comments/")
+@RequestMapping("/api/comments")
 public class CommentController {
 
     @Autowired
@@ -34,5 +36,11 @@ public class CommentController {
     {
         commentService.deleteComment(commentId);
         return  new ResponseEntity<>(new ApiResponse("Comment delete successfully.. ", true),HttpStatus.OK);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<CommentDto>> getAllComment()
+    {
+        return  new ResponseEntity<>(commentService.getAllComment(),HttpStatus.OK);
     }
 }

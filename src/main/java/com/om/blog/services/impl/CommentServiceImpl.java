@@ -13,6 +13,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -43,8 +45,29 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public CommentDto updateComment(CommentDto commentDto, Integer commentId) {
+        return null;
+    }
+
+    @Override
     public void deleteComment(Integer commentId) {
         Comment comment = commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Comment Id", commentId));
         commentRepo.delete(comment);
+    }
+
+    @Override
+    public List<CommentDto> getAllComment() {
+        List<Comment> commentList = commentRepo.findAll();
+        return commentList.stream().map(comment -> this.modelMapper.map(comment,CommentDto.class)).toList();
+    }
+
+    @Override
+    public CommentDto getCommentById(Integer commentId) {
+        return null;
+    }
+
+    @Override
+    public List<CommentDto> getCommentsByPost(Integer postId) {
+        return List.of();
     }
 }
