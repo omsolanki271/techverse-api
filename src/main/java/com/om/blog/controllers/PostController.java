@@ -6,15 +6,19 @@ import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostResponse;
 import com.om.blog.services.FileService;
 import com.om.blog.services.PostService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 
@@ -148,6 +152,15 @@ public class PostController {
             );
         }
     }
+    //method to serve files
 
-
+    @GetMapping(value = "/image/{imageName}",produces = MediaType.IMAGE_JPEG_VALUE)
+    public void downloadImage(
+            @PathVariable("imageName") String imageName,
+            HttpServletResponse response
+    ) throws IOException {
+        InputStream resource = fileService.getResource(path, imageName);
+        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+        StreamUtils.copy(resource,response.getOutputStream());
+    }
 }
