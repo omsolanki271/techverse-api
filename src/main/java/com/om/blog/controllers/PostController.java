@@ -4,6 +4,7 @@ import com.om.blog.config.AppConstants;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostResponse;
+import com.om.blog.services.FileService;
 import com.om.blog.services.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -22,6 +25,8 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private FileService fileService;
 
     //get value from application properties
     @Value("${project.image}")
@@ -114,6 +119,34 @@ public class PostController {
     {
         List<PostDto> postDto = postService.searchPosts(keyword);
         return new ResponseEntity<>(postDto,HttpStatus.OK);
+    }
+
+    //post image upload
+
+    @PostMapping("/image/upload/{postId}")
+    public ResponseEntity<?> uploadPostImage(
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @PathVariable Integer postId
+    ) throws IOException
+    {
+        if (image == null || image.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        //check post is avaliable or not
+        PostDto postDto = this.postService.getPostById(postId);
+
+        try {
+            //uploaded process
+            String uploadImage = this.fileService.uploadImage(path, image);
+            postDto.setImageName(uploadImage);
+            PostDto updatePost = this.postService.updatePost(postDto, postId);
+            return  new ResponseEntity<>(updatePost,HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(
+                    new ApiResponse(e.getMessage(), false),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
     }
 
 
