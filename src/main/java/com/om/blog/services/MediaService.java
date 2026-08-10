@@ -16,5 +16,5 @@ public interface MediaService {
 
     List<MediaDto> getMediaByUser(Integer userId);
 
-    void deleteMedia(Integer mediaId);
+    void deleteMedia(Integer mediaId) throws IOException;
 }

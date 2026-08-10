@@ -86,9 +86,13 @@ public class MediaServiceImpl implements MediaService {
 
 
     @Override
-    public void deleteMedia(Integer mediaId) {
+    public void deleteMedia(Integer mediaId) throws IOException {
         Media media = mediaRepo.findById(mediaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", mediaId));
+        fileService.deleteFile(
+                media.getFilePath(),
+                media.getFileName()
+        );
         mediaRepo.delete(media);
     }
 }

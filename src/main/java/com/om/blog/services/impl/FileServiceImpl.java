@@ -61,5 +61,16 @@ public class FileServiceImpl implements FileService {
         return  new FileInputStream(fullPath);
     }
 
+    @Override
+    public void deleteFile(String path, String fileName) throws IOException {
+        String fullPath = path + File.separator + fileName;
+
+        File file = new File(fullPath);
+
+        if (file.exists()) {
+            Files.delete(file.toPath());
+        }
+    }
+
 
 }

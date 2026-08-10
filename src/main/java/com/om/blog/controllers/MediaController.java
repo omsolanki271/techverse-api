@@ -67,7 +67,7 @@ public class MediaController {
     @DeleteMapping("/{mediaId}")
     public ResponseEntity<ApiResponse> deleteMedia(
             @PathVariable Integer mediaId
-    )
+    ) throws IOException
     {
         mediaService.deleteMedia(mediaId);
         return new ResponseEntity<>(new ApiResponse("Media deleted successfully", true), HttpStatus.OK);
