@@ -41,6 +41,10 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "media_id")
+    private Media media;
+
     @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
     private Set<Comment> comments = new HashSet<>();
 }
