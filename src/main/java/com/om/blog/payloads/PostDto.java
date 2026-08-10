@@ -40,5 +40,4 @@ public class PostDto {
     private LocalDateTime addedDate;
     private CategoryDto category;
     private UserDto user;
-    private Set<Comment> comments = new HashSet<>();
 }

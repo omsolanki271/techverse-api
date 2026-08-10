@@ -15,7 +15,12 @@ public class BlogBackendApplication {
 	@Bean
 	public ModelMapper modelMapper()
 	{
-		return new ModelMapper();
+		ModelMapper modelMapper = new ModelMapper();
+
+		modelMapper.getConfiguration()
+				.setPreferNestedProperties(false);
+
+		return modelMapper;
 	}
 
 }

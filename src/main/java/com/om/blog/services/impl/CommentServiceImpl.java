@@ -46,7 +46,10 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentDto updateComment(CommentDto commentDto, Integer commentId) {
-        return null;
+        Comment comment = commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Comment Id ", commentId));
+        comment.setContent(commentDto.getContent());
+        Comment saved = commentRepo.save(comment);
+        return this.modelMapper.map(saved,CommentDto.class);
     }
 
     @Override

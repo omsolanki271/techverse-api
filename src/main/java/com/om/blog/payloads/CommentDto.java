@@ -14,4 +14,6 @@ public class CommentDto {
     @NotBlank(message = "Comment content is required")
     @Size(min = 2, max = 1000, message = "Comment must be between 2 and 1000 characters")
     private String content;
+
+
 }

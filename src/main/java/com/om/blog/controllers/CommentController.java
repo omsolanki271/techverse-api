@@ -1,5 +1,6 @@
 package com.om.blog.controllers;
 
+import com.om.blog.entities.Comment;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.CommentDto;
 import com.om.blog.services.CommentService;
@@ -27,6 +28,16 @@ public class CommentController {
     {
         CommentDto comment = commentService.createComment(commentDto, postId, userId);
         return  new ResponseEntity<>(comment, HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{commentId}")
+    public ResponseEntity<CommentDto> updateComment(
+            @Valid @RequestBody CommentDto commentDto,
+            @PathVariable Integer commentId
+            )
+    {
+        CommentDto updateComment = commentService.updateComment(commentDto, commentId);
+        return new ResponseEntity<>(updateComment,HttpStatus.OK);
     }
 
     @DeleteMapping("/{commentId}")
