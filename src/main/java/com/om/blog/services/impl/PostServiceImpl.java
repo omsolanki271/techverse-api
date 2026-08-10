@@ -2,12 +2,14 @@ package com.om.blog.services.impl;
 
 import com.om.blog.config.AppConstants;
 import com.om.blog.entities.Category;
+import com.om.blog.entities.Media;
 import com.om.blog.entities.Post;
 import com.om.blog.entities.User;
 import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostResponse;
 import com.om.blog.repositories.CategoryRepo;
+import com.om.blog.repositories.MediaRepo;
 import com.om.blog.repositories.PostRepo;
 import com.om.blog.repositories.UserRepo;
 import com.om.blog.services.PostService;
@@ -36,6 +38,9 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private MediaRepo mediaRepo;
+
     @Override
     public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId) {
 
@@ -44,7 +49,16 @@ public class PostServiceImpl implements PostService {
 
         Post post = this.modelMapper.map(postDto, Post.class);
 
-        post.setImageName(AppConstants.DEFAULT_IMAGE);
+        if (postDto.getMediaId() != null) {
+            Media media = mediaRepo.findById(postDto.getMediaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+            post.setMedia(media);
+            post.setImageName(media.getFileName());
+        }
+        else {
+            post.setImageName(AppConstants.DEFAULT_IMAGE);
+        }
+
         post.setCategory(category);
         post.setUser(user);
         Post savePost = postRepo.save(post);

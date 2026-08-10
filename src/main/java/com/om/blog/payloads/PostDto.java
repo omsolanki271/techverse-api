@@ -37,6 +37,9 @@ public class PostDto {
     private String content;
 
     private String imageName;
+
+    private Integer mediaId;
+
     private LocalDateTime addedDate;
     private CategoryDto category;
     private UserDto user;
