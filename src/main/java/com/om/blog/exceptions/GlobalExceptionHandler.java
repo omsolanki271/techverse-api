@@ -23,6 +23,14 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ResourceAlreadyInUseException.class)
+    public ResponseEntity<ApiResponse> resourceAlreadyInUseException(
+            ResourceAlreadyInUseException ex) {
+        String msg = ex.getMessage();
+        ApiResponse response = new ApiResponse(msg,false);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     // Invalid Path Variable Exception
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -49,4 +57,6 @@ public class GlobalExceptionHandler{
 
         return  new ResponseEntity<Map<String,String>>(response,HttpStatus.BAD_REQUEST);
     }
+
+
 }

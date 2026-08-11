@@ -1,10 +1,13 @@
 package com.om.blog.services.impl;
 
 import com.om.blog.entities.Media;
+import com.om.blog.entities.Post;
 import com.om.blog.entities.User;
+import com.om.blog.exceptions.ResourceAlreadyInUseException;
 import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.MediaDto;
 import com.om.blog.repositories.MediaRepo;
+import com.om.blog.repositories.PostRepo;
 import com.om.blog.repositories.UserRepo;
 import com.om.blog.services.FileService;
 import com.om.blog.services.MediaService;
@@ -35,6 +38,8 @@ public class MediaServiceImpl implements MediaService {
 
     @Value("${project.image}")
     private String path;
+    @Autowired
+    private PostRepo postRepo;
 
     @Override
     public MediaDto uploadMedia(MultipartFile file, Integer userId) throws IOException {
@@ -89,6 +94,14 @@ public class MediaServiceImpl implements MediaService {
     public void deleteMedia(Integer mediaId) throws IOException {
         Media media = mediaRepo.findById(mediaId)
                 .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", mediaId));
+
+        List<Post> posts = postRepo.findByMedia(media);
+
+        if (!posts.isEmpty()) {
+            throw new ResourceAlreadyInUseException
+                    ("Media cannot be deleted because it is currently used by one or more posts.");
+        }
+
         fileService.deleteFile(
                 media.getFilePath(),
                 media.getFileName()

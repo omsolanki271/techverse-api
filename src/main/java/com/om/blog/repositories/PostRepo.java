@@ -1,6 +1,7 @@
 package com.om.blog.repositories;
 
 import com.om.blog.entities.Category;
+import com.om.blog.entities.Media;
 import com.om.blog.entities.Post;
 import com.om.blog.entities.User;
 import org.springframework.data.domain.Page;
@@ -17,5 +18,5 @@ public interface PostRepo extends JpaRepository<Post , Integer> {
 
     Page<Post> findByCategory(Category category, Pageable pageable);
     List<Post> findByTitleContainingOrContentContaining( String titleKeyword, String contentKeyword);
-
+    List<Post> findByMedia(Media media);
 }
