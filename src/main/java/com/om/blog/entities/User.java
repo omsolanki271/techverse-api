@@ -31,7 +31,7 @@ public class User implements UserDetails {
     private List<Post> posts = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_rol",
+    @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user",referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role" , referencedColumnName = "id")
     )
@@ -39,7 +39,12 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<SimpleGrantedAuthority> authorities = this.roles.stream().map((role) -> new SimpleGrantedAuthority(role.getName())).toList();
+
+        List<SimpleGrantedAuthority> authorities =
+                this.roles.stream()
+                        .map(role -> new SimpleGrantedAuthority(role.getName()))
+                        .toList();
+
         return authorities;
     }
 
