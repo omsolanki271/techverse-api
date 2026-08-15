@@ -2,6 +2,7 @@ package com.om.blog.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -10,10 +11,11 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final String secretKey =
-            "myblogapplicationsecretkeymyblogapplicationsecretkey";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final long jwtExpiration = 1000 * 60 * 60; // 1 hour
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
