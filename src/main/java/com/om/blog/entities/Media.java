@@ -1,8 +1,9 @@
 package com.om.blog.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "media")
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class Media {
 
     @Id
