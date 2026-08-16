@@ -12,6 +12,9 @@ import com.om.blog.services.CommentService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 
@@ -47,6 +50,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto updateComment(CommentDto commentDto, Integer commentId) {
         Comment comment = commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Comment Id ", commentId));
+        checkCommentOwnerOrAdmin(comment);
         comment.setContent(commentDto.getContent());
         Comment saved = commentRepo.save(comment);
         return this.modelMapper.map(saved,CommentDto.class);
@@ -55,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(Integer commentId) {
         Comment comment = commentRepo.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("Comment", "Comment Id", commentId));
+        checkCommentOwnerOrAdmin(comment);
         commentRepo.delete(comment);
     }
 
@@ -79,5 +84,25 @@ public class CommentServiceImpl implements CommentService {
         return comments.stream()
                 .map(comment -> modelMapper.map(comment, CommentDto.class))
                 .toList();
+    }
+
+    private void checkCommentOwnerOrAdmin(Comment comment) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String loggedInEmail = authentication.getName();
+
+        if (!comment.getUser().getEmail().equals(loggedInEmail)) {
+            throw new AccessDeniedException("You are not allowed to modify this comment");
+        }
     }
 }
