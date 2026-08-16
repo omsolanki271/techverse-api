@@ -28,7 +28,6 @@ public class UserController {
 
     // put - update user
     @PutMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable("userId") Integer uid) {
         UserDto dto = userService.updateUser(userDto, uid);
         return ResponseEntity.ok(dto);
@@ -53,7 +52,6 @@ public class UserController {
 
     // get - get one user
     @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isOwner(#userId)")
     public ResponseEntity<UserDto> getUserById(@PathVariable Integer userId)
     {
         return new ResponseEntity<>(userService.getUserById(userId),HttpStatus.OK);

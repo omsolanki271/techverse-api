@@ -50,6 +50,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(UserDto userDto, Integer userId) {
         User user = userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","Id",userId));
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin &&
+                !user.getEmail().equals(authentication.getName())) {
+
+            throw new AccessDeniedException(
+                    "You are not allowed to update this user"
+            );
+        }
+
         User dtouser = this.updateUserFromDto(user,userDto);
         User upUserToDto = userRepo.save(dtouser);
         return userToDto(upUserToDto);
