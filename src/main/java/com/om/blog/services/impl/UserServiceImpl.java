@@ -9,11 +9,13 @@ import com.om.blog.repositories.UserRepo;
 import com.om.blog.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -57,7 +59,12 @@ public class UserServiceImpl implements UserService {
     private User updateUserFromDto(User updateUser, UserDto userDto) {
         updateUser.setName(userDto.getName());
         updateUser.setEmail(userDto.getEmail());
-        updateUser.setPassword(userDto.getPassword());
+        if (userDto.getPassword() != null &&
+                !userDto.getPassword().isBlank()) {
+            updateUser.setPassword(
+                    passwordEncoder.encode(userDto.getPassword())
+            );
+        }
         updateUser.setAbout(userDto.getAbout());
         return updateUser;
     }
@@ -65,6 +72,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(Integer userId) {
         User user = userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User","Id",userId));
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin &&
+                !user.getEmail().equals(authentication.getName())) {
+
+            throw new AccessDeniedException(
+                    "You are not allowed to access this user"
+            );
+        }
         return userToDto(user);
     }
 

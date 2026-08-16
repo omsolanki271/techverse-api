@@ -53,6 +53,7 @@ public class UserController {
 
     // get - get one user
     @GetMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or @userSecurity.isOwner(#userId)")
     public ResponseEntity<UserDto> getUserById(@PathVariable Integer userId)
     {
         return new ResponseEntity<>(userService.getUserById(userId),HttpStatus.OK);
