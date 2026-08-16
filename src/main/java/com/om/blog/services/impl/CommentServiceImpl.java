@@ -36,10 +36,14 @@ public class CommentServiceImpl implements CommentService {
 
 
     @Override
-    public CommentDto createComment(CommentDto commentDto, Integer postId , Integer userId) {
+    public CommentDto createComment(CommentDto commentDto, Integer postId ) {
 
         Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
-        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "User Id ", userId));
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        User user = userRepo.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", 0));
         Comment comment = this.modelMapper.map(commentDto, Comment.class);
         comment.setPost(post);
         comment.setUser(user);

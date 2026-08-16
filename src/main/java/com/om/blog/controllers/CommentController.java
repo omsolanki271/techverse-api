@@ -18,14 +18,13 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @PostMapping("/user/{userId}/post/{postId}")
+    @PostMapping("/post/{postId}")
     public ResponseEntity<CommentDto> createComment(
             @Valid @RequestBody CommentDto commentDto ,
-            @PathVariable Integer userId,
             @PathVariable Integer postId
     )
     {
-        CommentDto comment = commentService.createComment(commentDto, postId, userId);
+        CommentDto comment = commentService.createComment(commentDto, postId);
         return  new ResponseEntity<>(comment, HttpStatus.CREATED);
     }
 

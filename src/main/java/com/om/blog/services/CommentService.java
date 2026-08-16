@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface CommentService {
 
-    CommentDto createComment(CommentDto commentDto, Integer postId, Integer userId);
+    CommentDto createComment(CommentDto commentDto, Integer postId);
 
     CommentDto updateComment(CommentDto commentDto, Integer commentId);
 
