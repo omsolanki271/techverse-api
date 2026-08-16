@@ -19,6 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -68,13 +71,22 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto updatePost(PostDto postDto , Integer postId) {
         Post post = postRepo.findById(postId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Post", "Post Id", postId));
+                .orElseThrow(() ->  new ResourceNotFoundException("Post", "Post Id", postId));
+
+        checkPostOwnerOrAdmin(post);
 
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setImageName(postDto.getImageName());
-
+        if (postDto.getMediaId() != null) {
+            Media media = mediaRepo.findById(postDto.getMediaId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+            post.setMedia(media);
+            post.setImageName(media.getFileName());
+        }
+        else {
+            post.setImageName(AppConstants.DEFAULT_IMAGE);
+        }
         Post updatedPost = postRepo.save(post);
 
         return modelMapper.map(updatedPost, PostDto.class);
@@ -83,6 +95,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Integer postId) {
         Post findId = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
+        checkPostOwnerOrAdmin(findId);
         postRepo.delete(findId);
     }
 
@@ -159,6 +172,28 @@ public class PostServiceImpl implements PostService {
     public List<PostDto> searchPosts(String keyword) {
         List<Post> byTitleContaining = this.postRepo.findByTitleContainingOrContentContaining(keyword,keyword);
         return byTitleContaining.stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList();
+    }
+
+    private void checkPostOwnerOrAdmin(Post post) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String loggedInEmail = authentication.getName();
+
+        if (!post.getUser().getEmail().equals(loggedInEmail)) {
+            throw new AccessDeniedException(
+                    "You are not allowed to modify this post"
+            );
+        }
     }
 }
 
