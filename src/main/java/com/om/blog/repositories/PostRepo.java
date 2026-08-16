@@ -19,4 +19,6 @@ public interface PostRepo extends JpaRepository<Post , Integer> {
     Page<Post> findByCategory(Category category, Pageable pageable);
     List<Post> findByTitleContainingOrContentContaining( String titleKeyword, String contentKeyword);
     List<Post> findByMedia(Media media);
+
+    Integer postId(Integer postId);
 }

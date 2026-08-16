@@ -1,9 +1,12 @@
 package com.om.blog.controllers;
 
 import com.om.blog.config.AppConstants;
+import com.om.blog.entities.Post;
+import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostResponse;
+import com.om.blog.repositories.PostRepo;
 import com.om.blog.services.FileService;
 import com.om.blog.services.PostService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,6 +34,9 @@ public class PostController {
 
     @Autowired
     private FileService fileService;
+
+    @Autowired
+    private PostRepo postRepo;
 
     //get value from application properties
     @Value("${project.image}")
@@ -141,7 +147,12 @@ public class PostController {
 
         try {
             //uploaded process
-            String uploadImage = this.fileService.uploadImage(path, image);
+            Post post = postRepo.findById(postId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Post", "Post Id", postId));
+
+            String userFolder = "user-" + post.getUser().getId();
+            String uploadImage = this.fileService.uploadImage(path,userFolder, image);
             postDto.setImageName(uploadImage);
             PostDto updatePost = this.postService.updatePost(postDto, postId);
             return  new ResponseEntity<>(updatePost,HttpStatus.OK);
@@ -157,13 +168,18 @@ public class PostController {
 
 // get to display post image with url
 
-    @GetMapping("/image/{imageName}")
+    @GetMapping("/image/{postId}")
     public void downloadImage(
-            @PathVariable("imageName") String imageName,
+            @PathVariable("postId") Integer postId,
             HttpServletResponse response
     ) throws IOException {
-        InputStream resource = fileService.getResource(path, imageName);
-        String contentType = getContentType(imageName);
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Post", "Post Id", postId));
+
+        String userFolder = "user-" + post.getUser().getId();
+        InputStream resource = fileService.getResource(path,userFolder, post.getImageName());
+        String contentType = getContentType(post.getImageName());
         response.setContentType(contentType);
         StreamUtils.copy(resource,response.getOutputStream());
     }

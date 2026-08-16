@@ -13,7 +13,7 @@ import java.util.UUID;
 public class FileServiceImpl implements FileService {
 
     @Override
-    public String uploadImage(String path, MultipartFile file) throws IOException {
+    public String uploadImage(String path,String userFolder, MultipartFile file) throws IOException {
 
         // File name
         String name = file.getOriginalFilename();
@@ -37,14 +37,17 @@ public class FileServiceImpl implements FileService {
 
         String fileName  = randomId.concat(extension);
 
-        // Full path
-        String filepath = path + File.separator + fileName ;
+        //user folder
+        String userPath = path + File.separator + userFolder;
 
-        // Create folder if not created
-        File file1 = new File(path);
+        // full path
+        String filepath = userPath + File.separator + fileName ;
 
-        if (!file1.exists()) {
-            file1.mkdirs();
+        // create user folder if it does not exist
+        File folder = new File(userPath);
+
+        if (!folder.exists()) {
+            folder.mkdirs();
         }
 
         // File copy
@@ -54,16 +57,16 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public InputStream getResource(String path, String fileName) throws FileNotFoundException {
+    public InputStream getResource(String path, String userFolder, String fileName) throws FileNotFoundException {
 
-        String fullPath = path + File.separator + fileName;
+        String fullPath = path + File.separator + userFolder + File.separator +  fileName;
 
         return  new FileInputStream(fullPath);
     }
 
     @Override
-    public void deleteFile(String path, String fileName) throws IOException {
-        String fullPath = path + File.separator + fileName;
+    public void deleteFile(String path,String userFolder, String fileName) throws IOException {
+        String fullPath = path + File.separator + userFolder + File.separator + fileName;
 
         File file = new File(fullPath);
 
