@@ -3,6 +3,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,4 +32,12 @@ public class UserDto {
     @NotBlank(message = "About is required")
     @Size(max = 500, message = "About cannot exceed 500 characters")
     private String about;
+
+    private String mobileNumber;
+    private String address;
+    private String githubUrl;
+    private String linkedinUrl;
+    private String instaUrl;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

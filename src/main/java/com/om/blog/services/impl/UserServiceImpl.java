@@ -2,6 +2,7 @@ package com.om.blog.services.impl;
 
 import com.om.blog.entities.Role;
 import com.om.blog.entities.User;
+import com.om.blog.exceptions.ResourceAlreadyInUseException;
 import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.UserDto;
 import com.om.blog.repositories.RoleRepo;
@@ -35,6 +36,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userDto.getMobileNumber() != null && !userDto.getMobileNumber().isBlank()) {
+            if (userRepo.existsByMobileNumber(userDto.getMobileNumber())) {
+                throw new ResourceAlreadyInUseException("Mobile number is already registered");
+            }
+        }
         User user = this.dtoToUser(userDto);
         user.setPassword(
                 passwordEncoder.encode(userDto.getPassword())
@@ -66,6 +72,14 @@ public class UserServiceImpl implements UserService {
             );
         }
 
+        if (userDto.getMobileNumber() != null && !userDto.getMobileNumber().isBlank()) {
+            userRepo.findByMobileNumber(userDto.getMobileNumber()).ifPresent(existingUser -> {
+                if (existingUser.getId() != userId) {
+                    throw new ResourceAlreadyInUseException("Mobile number is already registered");
+                }
+            });
+        }
+
         User dtouser = this.updateUserFromDto(user,userDto);
         User upUserToDto = userRepo.save(dtouser);
         return userToDto(upUserToDto);
@@ -82,6 +96,11 @@ public class UserServiceImpl implements UserService {
             );
         }
         updateUser.setAbout(userDto.getAbout());
+        updateUser.setMobileNumber(userDto.getMobileNumber());
+        updateUser.setAddress(userDto.getAddress());
+        updateUser.setGithubUrl(userDto.getGithubUrl());
+        updateUser.setLinkedinUrl(userDto.getLinkedinUrl());
+        updateUser.setInstaUrl(userDto.getInstaUrl());
         return updateUser;
     }
 
