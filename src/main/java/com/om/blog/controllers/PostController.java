@@ -43,14 +43,13 @@ public class PostController {
     private String path;
 
     //create
-    @PostMapping("/user/{userId}/category/{categoryId}/posts")
+    @PostMapping("/category/{categoryId}/posts")
     public ResponseEntity<PostDto> createPost(
-            @Valid @RequestBody PostDto postDto ,
-            @PathVariable Integer userId ,
+            @Valid @RequestBody PostDto postDto,
             @PathVariable Integer categoryId
     )
     {
-        PostDto createPost = postService.createPost(postDto, userId, categoryId);
+        PostDto createPost = postService.createPost(postDto, categoryId);
         return  new ResponseEntity<>(createPost , HttpStatus.CREATED);
     }
 
@@ -163,8 +162,7 @@ public class PostController {
             );
         }
     }
-    //method to serve files
-
+    //method to serve file
 
 // get to display post image with url
 
@@ -177,8 +175,16 @@ public class PostController {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Post", "Post Id", postId));
 
-        String userFolder = "user-" + post.getUser().getId();
-        InputStream resource = fileService.getResource(path,userFolder, post.getImageName());
+        InputStream resource;
+
+        if (AppConstants.DEFAULT_IMAGE.equals(post.getImageName())) {
+            resource = fileService.getResource(path, "", post.getImageName());
+        }
+        else
+        {
+            String userFolder = "user-" + post.getUser().getId();
+            resource = fileService.getResource(path, userFolder, post.getImageName());
+        }
         String contentType = getContentType(post.getImageName());
         response.setContentType(contentType);
         StreamUtils.copy(resource,response.getOutputStream());

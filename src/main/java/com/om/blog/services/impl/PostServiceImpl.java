@@ -45,16 +45,24 @@ public class PostServiceImpl implements PostService {
     private MediaRepo mediaRepo;
 
     @Override
-    public PostDto createPost(PostDto postDto, Integer userId, Integer categoryId) {
+    public PostDto createPost(PostDto postDto, Integer categoryId) {
 
         Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
-        User user = this.userRepo.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User" , "User id" , userId));
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        User user = this.userRepo.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", 0));
 
         Post post = this.modelMapper.map(postDto, Post.class);
 
         if (postDto.getMediaId() != null) {
             Media media = mediaRepo.findById(postDto.getMediaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+
+            checkMediaOwnerOrAdmin(media);
+
             post.setMedia(media);
             post.setImageName(media.getFileName());
         }
@@ -78,15 +86,21 @@ public class PostServiceImpl implements PostService {
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setImageName(postDto.getImageName());
+
         if (postDto.getMediaId() != null) {
             Media media = mediaRepo.findById(postDto.getMediaId())
                     .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+
+            checkMediaOwnerOrAdmin(media);
+
             post.setMedia(media);
             post.setImageName(media.getFileName());
         }
         else {
+            post.setMedia(null);
             post.setImageName(AppConstants.DEFAULT_IMAGE);
         }
+
         Post updatedPost = postRepo.save(post);
 
         return modelMapper.map(updatedPost, PostDto.class);
@@ -171,7 +185,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<PostDto> searchPosts(String keyword) {
         List<Post> byTitleContaining = this.postRepo.findByTitleContainingOrContentContaining(keyword,keyword);
-        return byTitleContaining.stream().map(post -> this.modelMapper.map(post, PostDto.class)).toList();
+        return byTitleContaining.stream().map(post -> this.modelMapper.map(post,PostDto.class)).toList();
     }
 
     private void checkPostOwnerOrAdmin(Post post) {
@@ -195,6 +209,26 @@ public class PostServiceImpl implements PostService {
             );
         }
     }
+
+    private void checkMediaOwnerOrAdmin(Media media) {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            return;
+        }
+
+        String loggedInEmail = authentication.getName();
+
+        if (!media.getUser().getEmail().equals(loggedInEmail)) {
+            throw new AccessDeniedException(
+                    "You are not allowed to use this media"
+            );
+        }
+    }
 }
-
-
