@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,22 +32,16 @@ public class User implements UserDetails {
 
     @Column(name = "mobile_number", unique = true)
     private String mobileNumber;
-
     private String address;
-
     @Column(name = "github_url")
     private String githubUrl;
-
     @Column(name = "linkedin_url")
     private String linkedinUrl;
-
     @Column(name = "insta_url")
     private String instaUrl;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

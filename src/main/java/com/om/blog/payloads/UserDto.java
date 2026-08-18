@@ -34,16 +34,10 @@ public class UserDto {
     private String about;
 
     private String mobileNumber;
-
     private String address;
-
     private String githubUrl;
-
     private String linkedinUrl;
-
     private String instaUrl;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }
