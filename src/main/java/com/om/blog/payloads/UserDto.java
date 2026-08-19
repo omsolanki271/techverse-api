@@ -37,4 +37,6 @@ public class UserDto {
     private String instaUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    private java.util.Set<com.om.blog.entities.Role> roles;
 }

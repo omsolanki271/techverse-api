@@ -20,5 +20,8 @@ public interface PostRepo extends JpaRepository<Post , Integer> {
     List<Post> findByTitleContainingOrContentContaining( String titleKeyword, String contentKeyword);
     List<Post> findByMedia(Media media);
 
+    @org.springframework.data.jpa.repository.Query("SELECT p FROM Post p WHERE (:categoryId IS NULL OR p.category.categoryId = :categoryId) AND (:title IS NULL OR :title = '' OR LOWER(p.title) LIKE LOWER(CONCAT('%', :title, '%')))")
+    List<Post> searchByCategoryAndTitle(@org.springframework.data.repository.query.Param("categoryId") Integer categoryId, @org.springframework.data.repository.query.Param("title") String title);
+
     Integer postId(Integer postId);
 }

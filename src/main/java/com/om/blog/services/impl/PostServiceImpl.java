@@ -187,9 +187,9 @@ public class PostServiceImpl implements PostService {
 
     // work like query
     @Override
-    public List<PostDto> searchPosts(String keyword) {
-        List<Post> byTitleContaining = this.postRepo.findByTitleContainingOrContentContaining(keyword,keyword);
-        return byTitleContaining.stream().map(post -> this.modelMapper.map(post,PostDto.class)).toList();
+    public List<PostDto> searchPosts(String keyword, Integer categoryId) {
+        List<Post> posts = this.postRepo.searchByCategoryAndTitle(categoryId, keyword);
+        return posts.stream().map(post -> this.modelMapper.map(post,PostDto.class)).toList();
     }
 
     private void checkPostOwnerOrAdmin(Post post) {

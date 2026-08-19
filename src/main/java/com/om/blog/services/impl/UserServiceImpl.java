@@ -42,6 +42,9 @@ public class UserServiceImpl implements UserService {
             }
         }
         User user = this.dtoToUser(userDto);
+        if (user.getRoles() == null) {
+            user.setRoles(new java.util.HashSet<>());
+        }
         user.setPassword(
                 passwordEncoder.encode(userDto.getPassword())
         );
