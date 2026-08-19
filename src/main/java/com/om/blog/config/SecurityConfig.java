@@ -80,6 +80,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/login", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/categories/**", "/api/media/**", "/api/comments/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

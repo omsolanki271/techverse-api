@@ -35,6 +35,9 @@ public class Post {
     @CurrentTimestamp
     private LocalDateTime addedDate;
 
+    @Column(columnDefinition = "integer default 0")
+    private int views = 0;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

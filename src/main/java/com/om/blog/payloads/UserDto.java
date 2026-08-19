@@ -22,10 +22,7 @@ public class UserDto {
     private String email;
 
     @NotBlank(message = "Password is required")
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%^&+=!]).{8,15}$",
-            message = "Password must contain at least one uppercase letter, one lowercase letter, one number, one special character, and be 8 to 15 characters long"
-    )
+    @Size(min = 4, max = 15, message = "Password must be 4 to 15 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
