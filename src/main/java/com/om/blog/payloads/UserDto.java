@@ -21,12 +21,9 @@ public class UserDto {
     @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 4, max = 15, message = "Password must be 4 to 15 characters long")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    @NotBlank(message = "About is required")
     @Size(max = 500, message = "About cannot exceed 500 characters")
     private String about;
 

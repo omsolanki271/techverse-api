@@ -36,6 +36,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
         if (userDto.getMobileNumber() != null && !userDto.getMobileNumber().isBlank()) {
             if (userRepo.existsByMobileNumber(userDto.getMobileNumber())) {
                 throw new ResourceAlreadyInUseException("Mobile number is already registered");
