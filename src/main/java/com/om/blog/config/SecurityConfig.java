@@ -21,11 +21,13 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableWebMvc
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -78,6 +80,11 @@ public class SecurityConfig {
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/api/auth/login", "/error").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/categories/**", "/api/media/**", "/api/comments/**").permitAll()

@@ -1,9 +1,11 @@
 package com.om.blog.services;
 
-import com.om.blog.entities.Post;
 import com.om.blog.payloads.PostDto;
+import com.om.blog.payloads.PostImageResponse;
 import com.om.blog.payloads.PostResponse;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public interface PostService {
@@ -27,4 +29,8 @@ public interface PostService {
 
     //search
     List<PostDto> searchPosts(String keyword, Integer categoryId);
+
+    PostDto uploadPostImage(Integer postId, MultipartFile image) throws IOException;
+
+    PostImageResponse getPostImage(Integer postId) throws IOException;
 }

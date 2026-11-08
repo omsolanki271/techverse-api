@@ -1,3 +1,4 @@
+
 package com.om.blog.services.impl;
 
 import com.om.blog.config.AppConstants;
@@ -7,24 +8,34 @@ import com.om.blog.entities.Post;
 import com.om.blog.entities.User;
 import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.PostDto;
+import com.om.blog.payloads.PostImageResponse;
 import com.om.blog.payloads.PostResponse;
 import com.om.blog.repositories.CategoryRepo;
 import com.om.blog.repositories.MediaRepo;
 import com.om.blog.repositories.PostRepo;
 import com.om.blog.repositories.UserRepo;
+import com.om.blog.services.FileService;
 import com.om.blog.services.PostService;
+
 import org.modelmapper.ModelMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -44,61 +55,82 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private MediaRepo mediaRepo;
 
+    @Autowired
+    private FileService fileService;
+
+    @Value("${project.image}")
+    private String path;
+
+
+    // Create Post
     @Override
     public PostDto createPost(PostDto postDto, Integer categoryId) {
 
-        Category category = this.categoryRepo.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException("Category", "Category Id", categoryId));
+        Category category = categoryRepo.findById(categoryId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Category", "Category Id", categoryId));
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
-        User user = this.userRepo.findByEmail(authentication.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "Email", 0));
+        User user = userRepo.findByEmail(authentication.getName())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User", "Email", 0));
 
-        Post post = this.modelMapper.map(postDto, Post.class);
+        Post post = modelMapper.map(postDto, Post.class);
 
         if (postDto.getMediaId() != null) {
+
             Media media = mediaRepo.findById(postDto.getMediaId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Media", "Media Id", postDto.getMediaId()));
 
             checkMediaOwnerOrAdmin(media);
 
             post.setMedia(media);
             post.setImageName(media.getFileName());
-        }
-        else {
+
+        } else {
             post.setImageName(AppConstants.DEFAULT_IMAGE);
         }
 
         post.setCategory(category);
         post.setUser(user);
-        Post savePost = postRepo.save(post);
-        return this.modelMapper.map(savePost , PostDto.class);
+
+        Post savedPost = postRepo.save(post);
+
+        return modelMapper.map(savedPost, PostDto.class);
     }
 
+
+    // Update Post
     @Override
-    public PostDto updatePost(PostDto postDto , Integer postId) {
+    public PostDto updatePost(PostDto postDto, Integer postId) {
+
         Post post = postRepo.findById(postId)
-                .orElseThrow(() ->  new ResourceNotFoundException("Post", "Post Id", postId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
 
         checkPostOwnerOrAdmin(post);
 
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
-        post.setImageName(postDto.getImageName());
 
+        // Update media only when a new media ID is provided
         if (postDto.getMediaId() != null) {
+
             Media media = mediaRepo.findById(postDto.getMediaId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Media", "Media Id", postDto.getMediaId() ));
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Media", "Media Id", postDto.getMediaId()));
 
             checkMediaOwnerOrAdmin(media);
 
             post.setMedia(media);
             post.setImageName(media.getFileName());
-        }
-        else {
-            post.setMedia(null);
-            post.setImageName(AppConstants.DEFAULT_IMAGE);
         }
 
         Post updatedPost = postRepo.save(post);
@@ -106,66 +138,117 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(updatedPost, PostDto.class);
     }
 
+
+    // Delete Post
     @Override
     public void deletePost(Integer postId) {
-        Post findId = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
-        checkPostOwnerOrAdmin(findId);
-        postRepo.delete(findId);
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
+
+        checkPostOwnerOrAdmin(post);
+
+        postRepo.delete(post);
     }
 
-    @Override
-    public PostResponse getAllPosts(Integer pageNumber , Integer pageSize , String sortBy , String sortDirection) {
 
-        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
-        Pageable pageable  = PageRequest.of(pageNumber,pageSize,sort);
+    // Get All Posts with Pagination
+    @Override
+    public PostResponse getAllPosts(
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortDirection) {
+
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(
+                pageNumber, pageSize, sort);
 
         Page<Post> pagePost = postRepo.findAll(pageable);
 
         return createPostResponse(pagePost);
     }
 
+
+    // Get Post By ID
     @Override
     public PostDto getPostById(Integer postId) {
-        Post post = postRepo.findById(postId).orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", postId));
-        
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
+
         post.setViews(post.getViews() + 1);
+
         postRepo.save(post);
-        
+
         return modelMapper.map(post, PostDto.class);
     }
 
-    @Override
-    public PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize , String sortBy , String sortDirection)  {
 
-//        System.out.println("Category Id = " + categoryId);
+    // Get Posts By Category
+    @Override
+    public PostResponse getPostByCategory(
+            Integer categoryId,
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortDirection) {
+
         Category category = categoryRepo.findById(categoryId)
-                .orElseThrow(() ->  new ResourceNotFoundException("Category", "Category Id", categoryId));
-//       System.out.println("Category Found = " + category.getCategoryTitle());
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Category", "Category Id", categoryId));
 
-        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize , sort);
+        Pageable pageable = PageRequest.of(
+                pageNumber, pageSize, sort);
 
-        Page<Post> pagePost = postRepo.findByCategory(category, pageable);
+        Page<Post> pagePost =
+                postRepo.findByCategory(category, pageable);
 
         return createPostResponse(pagePost);
     }
 
+
+    // Get Posts By User
     @Override
-    public PostResponse getPostByUser(Integer userId, Integer pageNumber, Integer pageSize ,  String sortBy , String sortDirection)
-    {
+    public PostResponse getPostByUser(
+            Integer userId,
+            Integer pageNumber,
+            Integer pageSize,
+            String sortBy,
+            String sortDirection) {
 
-        User user = this.userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "User Id", userId));
-        Sort sort = (sortDirection.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending());
+        User user = userRepo.findById(userId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User", "User Id", userId));
 
-        Pageable pageable = PageRequest.of(pageNumber, pageSize , sort);
+        Sort sort = sortDirection.equalsIgnoreCase("asc")
+                ? Sort.by(sortBy).ascending()
+                : Sort.by(sortBy).descending();
 
-        Page<Post> pagePost = postRepo.findByUser(user, pageable);
+        Pageable pageable = PageRequest.of(
+                pageNumber, pageSize, sort);
+
+        Page<Post> pagePost =
+                postRepo.findByUser(user, pageable);
 
         return createPostResponse(pagePost);
     }
 
+
+    // Create Post Response
     private PostResponse createPostResponse(Page<Post> pagePost) {
 
         List<PostDto> postDtos = pagePost.getContent()
@@ -185,13 +268,112 @@ public class PostServiceImpl implements PostService {
         return postResponse;
     }
 
-    // work like query
+
+    // Search Posts
     @Override
-    public List<PostDto> searchPosts(String keyword, Integer categoryId) {
-        List<Post> posts = this.postRepo.searchByCategoryAndTitle(categoryId, keyword);
-        return posts.stream().map(post -> this.modelMapper.map(post,PostDto.class)).toList();
+    public List<PostDto> searchPosts(
+            String keyword,
+            Integer categoryId) {
+
+        List<Post> posts =
+                postRepo.searchByCategoryAndTitle(categoryId, keyword);
+
+        return posts.stream()
+                .map(post -> modelMapper.map(post, PostDto.class))
+                .toList();
     }
 
+
+    // Upload Post Image
+    @Override
+    public PostDto uploadPostImage(
+            Integer postId,
+            MultipartFile image) throws IOException {
+
+        if (image == null || image.isEmpty()) {
+            throw new IOException("Please select an image.");
+        }
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
+
+        // Check ownership before uploading the image
+        checkPostOwnerOrAdmin(post);
+
+        String userFolder = "user-" + post.getUser().getId();
+
+        String fileName = fileService.uploadImage(
+                path, userFolder, image);
+
+        post.setImageName(fileName);
+
+        // This post now uses its own uploaded image
+        post.setMedia(null);
+
+        Post updatedPost = postRepo.save(post);
+
+        return modelMapper.map(updatedPost, PostDto.class);
+    }
+
+
+    // Get Post Image
+    @Override
+    public PostImageResponse getPostImage(
+            Integer postId) throws IOException {
+
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
+
+        String userFolder = "";
+
+        if (!AppConstants.DEFAULT_IMAGE.equals(post.getImageName())) {
+            userFolder = "user-" + post.getUser().getId();
+        }
+
+        try (InputStream inputStream = fileService.getResource(
+                path, userFolder, post.getImageName())) {
+
+            byte[] imageData = inputStream.readAllBytes();
+
+            String contentType = getContentType(post.getImageName());
+
+            return new PostImageResponse(imageData, contentType);
+        }
+    }
+
+
+    // Get Image Content Type
+    private String getContentType(String imageName) {
+
+        String extension = imageName.substring(
+                imageName.lastIndexOf(".")
+        ).toLowerCase(Locale.ROOT);
+
+        return switch (extension) {
+
+            case ".jpg", ".jpeg" ->
+                    MediaType.IMAGE_JPEG_VALUE;
+
+            case ".png" ->
+                    MediaType.IMAGE_PNG_VALUE;
+
+            case ".gif" ->
+                    MediaType.IMAGE_GIF_VALUE;
+
+            case ".webp" ->
+                    "image/webp";
+
+            default ->
+                    MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        };
+    }
+
+
+    // Check Post Owner or Admin
     private void checkPostOwnerOrAdmin(Post post) {
 
         Authentication authentication =
@@ -208,12 +390,14 @@ public class PostServiceImpl implements PostService {
         String loggedInEmail = authentication.getName();
 
         if (!post.getUser().getEmail().equals(loggedInEmail)) {
+
             throw new AccessDeniedException(
-                    "You are not allowed to modify this post"
-            );
+                    "You are not allowed to modify this post");
         }
     }
 
+
+    // Check Media Owner or Admin
     private void checkMediaOwnerOrAdmin(Media media) {
 
         Authentication authentication =
@@ -230,9 +414,9 @@ public class PostServiceImpl implements PostService {
         String loggedInEmail = authentication.getName();
 
         if (!media.getUser().getEmail().equals(loggedInEmail)) {
+
             throw new AccessDeniedException(
-                    "You are not allowed to use this media"
-            );
+                    "You are not allowed to use this media");
         }
     }
 }

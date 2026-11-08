@@ -1,79 +1,115 @@
+
 package com.om.blog.services.impl;
 
 import com.om.blog.services.FileService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
 public class FileServiceImpl implements FileService {
 
     @Override
-    public String uploadImage(String path,String userFolder, MultipartFile file) throws IOException {
+    public String uploadImage(String path, String userFolder,
+                              MultipartFile file) throws IOException {
 
-        // File name
-        String name = file.getOriginalFilename();
-
-        if (name == null || !name.contains(".")) {
-            throw new IOException("Invalid image file");
+        if (file == null || file.isEmpty()) {
+            throw new IOException("Please select an image.");
         }
 
-        String extension = name.substring(name.lastIndexOf(".")).toLowerCase();
+        String originalName = file.getOriginalFilename();
+
+        if (originalName == null || !originalName.contains(".")) {
+            throw new IOException("Invalid image file.");
+        }
+
+        String extension = originalName.substring(
+                originalName.lastIndexOf(".")
+        ).toLowerCase(Locale.ROOT);
 
         if (!extension.equals(".jpg")
                 && !extension.equals(".jpeg")
                 && !extension.equals(".png")
                 && !extension.equals(".gif")
-                && !extension.equals(".webp"))
-        {
-            throw new IOException("Invalid image format. Only JPG, JPEG, PNG, GIF and WEBP are allowed.");
+                && !extension.equals(".webp")) {
+
+            throw new IOException(
+                    "Only JPG, JPEG, PNG, GIF and WEBP images are allowed."
+            );
         }
 
-        String randomId = UUID.randomUUID().toString();
+        String fileName = UUID.randomUUID() + extension;
 
-        String fileName  = randomId.concat(extension);
+        Path folderPath = resolveSafePath(path, userFolder, "");
 
-        //user folder
-        String userPath = path + File.separator + userFolder;
+        // Create user folder if it does not exist
+        Files.createDirectories(folderPath);
 
-        // full path
-        String filepath = userPath + File.separator + fileName ;
+        Path filePath = resolveSafePath(path, userFolder, fileName);
 
-        // create user folder if it does not exist
-        File folder = new File(userPath);
-
-        if (!folder.exists()) {
-            folder.mkdirs();
+        // Save uploaded image
+        try (InputStream inputStream = file.getInputStream()) {
+            Files.copy(inputStream, filePath);
         }
-
-        // File copy
-        Files.copy(file.getInputStream(), Paths.get(filepath));
 
         return fileName;
     }
 
     @Override
-    public InputStream getResource(String path, String userFolder, String fileName) throws FileNotFoundException {
+    public InputStream getResource(String path, String userFolder,
+                                   String fileName)
+            throws FileNotFoundException {
 
-        String fullPath = path + File.separator + userFolder + File.separator +  fileName;
+        Path filePath = resolveSafePath(path, userFolder, fileName);
 
-        return  new FileInputStream(fullPath);
+        return new FileInputStream(filePath.toFile());
     }
 
     @Override
-    public void deleteFile(String path,String userFolder, String fileName) throws IOException {
-        String fullPath = path + File.separator + userFolder + File.separator + fileName;
+    public void deleteFile(String path, String userFolder,
+                           String fileName) throws IOException {
 
-        File file = new File(fullPath);
+        Path filePath = resolveSafePath(path, userFolder, fileName);
 
-        if (file.exists()) {
-            Files.delete(file.toPath());
-        }
+        // Delete only if the file exists
+        Files.deleteIfExists(filePath);
     }
 
+    // Build and validate file paths
+    private Path resolveSafePath(String path, String userFolder,
+                                 String fileName) {
 
+        Path basePath = Paths.get(path).toAbsolutePath().normalize();
+
+        Path folderPath = basePath;
+
+        if (userFolder != null && !userFolder.isBlank()) {
+            folderPath = basePath.resolve(userFolder).normalize();
+        }
+
+        if (!folderPath.startsWith(basePath)) {
+            throw new IllegalArgumentException("Invalid folder path.");
+        }
+
+        if (fileName == null || fileName.isBlank()) {
+            return folderPath;
+        }
+
+        Path filePath = folderPath.resolve(fileName).normalize();
+
+        if (!filePath.startsWith(folderPath)) {
+            throw new IllegalArgumentException("Invalid file path.");
+        }
+
+        return filePath;
+    }
 }
