@@ -61,7 +61,7 @@ public class GlobalExceptionHandler{
     @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
     public ResponseEntity<ApiResponse> badCredentialsExceptionHandler(org.springframework.security.authentication.BadCredentialsException ex)
     {
-        String msg = "Invalid Username or Password !!";
+        String msg = (ex.getMessage() != null && !ex.getMessage().isBlank()) ? ex.getMessage() : "Invalid Username or Password !!";
         ApiResponse response = new ApiResponse(msg, false);
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }

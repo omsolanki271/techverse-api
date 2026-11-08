@@ -5,3 +5,4 @@ USE blog_app_api;
 
 ALTER TABLE users ADD COLUMN created_at DATETIME NULL;
 ALTER TABLE users ADD COLUMN updated_at DATETIME NULL;
+ALTER TABLE users ADD COLUMN google_id VARCHAR(255) NULL;

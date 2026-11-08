@@ -34,6 +34,8 @@ public class UserDto {
     private String githubUrl;
     private String linkedinUrl;
     private String instaUrl;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String googleId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
