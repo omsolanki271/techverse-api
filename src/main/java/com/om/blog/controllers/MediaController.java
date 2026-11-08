@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,12 +103,20 @@ public class MediaController {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Media", "Media Id", mediaId));
 
-        String userFolder = "user-" + media.getUser().getId();
-        InputStream resource = fileService.getResource(path, userFolder, media.getFileName());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
-        String contentType = getContentType(media.getFileName());
-        response.setContentType(contentType);
-        StreamUtils.copy(resource, response.getOutputStream());
+        if (!isAdmin && !media.getUser().getEmail().equals(authentication.getName())) {
+            throw new AccessDeniedException("You are not allowed to download this media");
+        }
+
+        String userFolder = "user-" + media.getUser().getId();
+        try (InputStream resource = fileService.getResource(path, userFolder, media.getFileName())) {
+            String contentType = getContentType(media.getFileName());
+            response.setContentType(contentType);
+            StreamUtils.copy(resource, response.getOutputStream());
+        }
     }
 
     private String getContentType(String fileName) {

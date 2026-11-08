@@ -1,9 +1,11 @@
 package com.om.blog.payloads;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.om.blog.entities.Role;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -35,5 +37,6 @@ public class UserDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
-    private java.util.Set<com.om.blog.entities.Role> roles;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Set<Role> roles;
 }

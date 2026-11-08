@@ -1,5 +1,6 @@
 package com.om.blog.payloads;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -47,5 +48,6 @@ public class PostDto {
 
     private CategoryDto category;
 
+    @JsonIgnoreProperties({"password", "email", "mobileNumber", "address", "roles", "createdAt", "updatedAt"})
     private UserDto user;
 }
