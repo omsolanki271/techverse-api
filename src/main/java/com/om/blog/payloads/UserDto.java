@@ -39,6 +39,11 @@ public class UserDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     
+    private long followerCount = 0;
+    private long followingCount = 0;
+    private boolean following = false;
+    private boolean subscribed = false;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Role> roles;
 }

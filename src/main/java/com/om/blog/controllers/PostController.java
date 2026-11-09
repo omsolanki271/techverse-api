@@ -1,4 +1,5 @@
 package com.om.blog.controllers;
+
 import com.om.blog.payloads.ApiResponse;
 import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostImageResponse;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -36,8 +38,8 @@ public class PostController {
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
-    // Get All Posts
-    @GetMapping("/")
+    // Get All Published Posts
+    @GetMapping({"", "/"})
     public ResponseEntity<PostResponse> getAllPosts(
             @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
@@ -121,6 +123,70 @@ public class PostController {
         List<PostDto> postDto = postService.searchPosts(keyword, categoryId);
 
         return new ResponseEntity<>(postDto, HttpStatus.OK);
+    }
+
+    // Feature 1 & 7: Toggle Like
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.toggleLike(postId));
+    }
+
+    // Get Like Status & Count
+    @GetMapping("/{postId}/like-status")
+    public ResponseEntity<Map<String, Object>> getLikeStatus(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.getLikeStatus(postId));
+    }
+
+    // Feature 4 & 8: Toggle Bookmark
+    @PostMapping("/{postId}/bookmark")
+    public ResponseEntity<Map<String, Object>> toggleBookmark(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.toggleBookmark(postId));
+    }
+
+    // Get Bookmark Status & Count
+    @GetMapping("/{postId}/bookmark-status")
+    public ResponseEntity<Map<String, Object>> getBookmarkStatus(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.getBookmarkStatus(postId));
+    }
+
+    // Get User's Bookmarked Posts
+    @GetMapping("/bookmarks/my-bookmarks")
+    public ResponseEntity<PostResponse> getMyBookmarks(
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "desc", required = false) String sortDirection) {
+
+        return ResponseEntity.ok(postService.getMyBookmarks(pageNumber, pageSize, sortBy, sortDirection));
+    }
+
+    // Feature 5: Share counter
+    @PostMapping("/{postId}/share")
+    public ResponseEntity<Map<String, Object>> incrementShare(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.incrementShareCount(postId));
+    }
+
+    // Feature 9 & 10: Publish Draft
+    @PutMapping("/{postId}/publish")
+    public ResponseEntity<PostDto> publishPost(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.publishPost(postId));
+    }
+
+    // Get Authenticated User's Drafts
+    @GetMapping("/drafts/my-drafts")
+    public ResponseEntity<PostResponse> getMyDrafts(
+            @RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "sortBy", defaultValue = "postId", required = false) String sortBy,
+            @RequestParam(value = "sortDirection", defaultValue = "desc", required = false) String sortDirection) {
+
+        return ResponseEntity.ok(postService.getMyDrafts(pageNumber, pageSize, sortBy, sortDirection));
+    }
+
+    // Get Post Counts (draft vs published)
+    @GetMapping("/user/{userId}/counts")
+    public ResponseEntity<Map<String, Object>> getUserPostCounts(@PathVariable Integer userId) {
+        return ResponseEntity.ok(postService.getUserPostCounts(userId));
     }
 
     // Upload Post Image

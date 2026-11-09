@@ -86,8 +86,18 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/google", "/error").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users/").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/posts/**", "/api/categories/**", "/api/comments/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/").permitAll()
+                        .requestMatchers(
+                                "/api/posts/bookmarks/my-bookmarks",
+                                "/api/posts/drafts/my-drafts",
+                                "/api/users/subscriptions/my-subscriptions"
+                        ).authenticated()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/posts", "/api/posts/**",
+                                "/api/categories", "/api/categories/**",
+                                "/api/comments", "/api/comments/**",
+                                "/api/users", "/api/users/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

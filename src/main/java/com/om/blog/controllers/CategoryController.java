@@ -52,7 +52,7 @@ public class CategoryController {
         return new ResponseEntity<>(fetchCategory,HttpStatus.OK);
     }
 
-    @GetMapping("/")
+    @GetMapping({"", "/"})
     public ResponseEntity<List<CategoryDto>> getAllCategories()
     {
         return new ResponseEntity<>(categoryService.getAllCategories(),HttpStatus.OK);

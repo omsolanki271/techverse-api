@@ -49,7 +49,7 @@ public class CommentController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/")
+    @GetMapping({"", "/"})
     public ResponseEntity<List<CommentDto>> getAllComment()
     {
         return  new ResponseEntity<>(commentService.getAllComment(),HttpStatus.OK);

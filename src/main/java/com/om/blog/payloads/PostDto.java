@@ -18,6 +18,12 @@ import java.time.LocalDateTime;
         "mediaId",
         "addedDate",
         "views",
+        "shareCount",
+        "status",
+        "likeCount",
+        "bookmarkCount",
+        "liked",
+        "bookmarked",
         "category",
         "user"
 })
@@ -45,6 +51,18 @@ public class PostDto {
     private LocalDateTime addedDate;
 
     private int views;
+
+    private int shareCount = 0;
+
+    private String status = "PUBLISHED"; // DRAFT, PUBLISHED
+
+    private long likeCount = 0;
+
+    private long bookmarkCount = 0;
+
+    private boolean liked = false;
+
+    private boolean bookmarked = false;
 
     private CategoryDto category;
 

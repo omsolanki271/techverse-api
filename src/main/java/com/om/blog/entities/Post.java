@@ -38,6 +38,12 @@ public class Post {
     @Column(columnDefinition = "integer default 0")
     private int views = 0;
 
+    @Column(name = "share_count", columnDefinition = "integer default 0")
+    private int shareCount = 0;
+
+    @Column(length = 20, nullable = false)
+    private String status = "PUBLISHED"; // DRAFT, PUBLISHED
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -50,6 +56,20 @@ public class Post {
     @JoinColumn(name = "media_id")
     private Media media;
 
-    @OneToMany(mappedBy = "post",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostLike> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostBookmark> bookmarks = new HashSet<>();
+
+    @PrePersist
+    @PreUpdate
+    public void ensureStatus() {
+        if (this.status == null || this.status.isBlank()) {
+            this.status = "PUBLISHED";
+        }
+    }
 }
