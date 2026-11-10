@@ -5,4 +5,5 @@
 target
 *.iml
 .env
+.env.docker
 application-local.properties
