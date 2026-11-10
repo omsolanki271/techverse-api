@@ -20,6 +20,10 @@ public class MediaDto {
 
     private String filePath;
 
+    private String cloudinaryUrl;
+
+    private String publicId;
+
     private LocalDateTime uploadedDate;
 
 }

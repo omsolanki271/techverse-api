@@ -111,6 +111,13 @@ public class MediaController {
             throw new AccessDeniedException("You are not allowed to download this media");
         }
 
+        // If stored in Cloudinary, redirect to secure URL
+        if (media.getCloudinaryUrl() != null && !media.getCloudinaryUrl().isBlank()) {
+            response.sendRedirect(media.getCloudinaryUrl());
+            return;
+        }
+
+        // Backward compatibility: Stream legacy local file
         String userFolder = "user-" + media.getUser().getId();
         try (InputStream resource = fileService.getResource(path, userFolder, media.getFileName())) {
             String contentType = getContentType(media.getFileName());

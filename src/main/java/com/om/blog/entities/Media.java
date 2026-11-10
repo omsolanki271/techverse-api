@@ -32,6 +32,12 @@ public class Media {
     @CurrentTimestamp
     private LocalDateTime uploadedDate;
 
+    @Column(name = "cloudinary_url", length = 1000)
+    private String cloudinaryUrl;
+
+    @Column(name = "public_id", length = 255)
+    private String publicId;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

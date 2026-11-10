@@ -5,6 +5,7 @@ import com.om.blog.payloads.PostDto;
 import com.om.blog.payloads.PostImageResponse;
 import com.om.blog.payloads.PostResponse;
 import com.om.blog.services.PostService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -209,9 +210,19 @@ public class PostController {
 
     // Get / Display Post Image
     @GetMapping("/image/{postId}")
-    public ResponseEntity<byte[]> downloadImage(
-            @PathVariable Integer postId) throws IOException {
+    public ResponseEntity<?> downloadImage(
+            @PathVariable Integer postId,
+            HttpServletResponse response) throws IOException {
 
+        PostDto post = postService.getPostById(postId);
+
+        // If post has a Cloudinary URL, redirect directly
+        if (post.getCloudinaryUrl() != null && !post.getCloudinaryUrl().isBlank()) {
+            response.sendRedirect(post.getCloudinaryUrl());
+            return null;
+        }
+
+        // Backward compatibility for legacy local images
         PostImageResponse image = postService.getPostImage(postId);
 
         return ResponseEntity.ok()

@@ -46,6 +46,10 @@ public class PostDto {
 
     private String imageName;
 
+    private String cloudinaryUrl;
+
+    private String publicId;
+
     private Integer mediaId;
 
     private LocalDateTime addedDate;

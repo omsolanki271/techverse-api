@@ -54,6 +54,24 @@ public interface PostRepo extends JpaRepository<Post, Integer> {
 
     List<Post> findByMedia(Media media);
 
+    // Search published posts across all categories by keyword in title or content
+    @Query("SELECT p FROM Post p WHERE " +
+            "(p.status IS NULL OR UPPER(p.status) = 'PUBLISHED' OR UPPER(p.status) != 'DRAFT') " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<Post> searchByKeyword(@Param("keyword") String keyword);
+
+    // Search published posts within a specific category by keyword in title or content
+    @Query("SELECT p FROM Post p WHERE " +
+            "(p.status IS NULL OR UPPER(p.status) = 'PUBLISHED' OR UPPER(p.status) != 'DRAFT') " +
+            "AND p.category.categoryId = :categoryId " +
+            "AND (LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<Post> searchByCategoryAndKeyword(
+            @Param("categoryId") Integer categoryId,
+            @Param("keyword") String keyword
+    );
+
     // Search published posts by category and title or content
     @Query("SELECT p FROM Post p WHERE " +
             "(p.status IS NULL OR UPPER(p.status) = 'PUBLISHED' OR UPPER(p.status) != 'DRAFT') " +

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -105,6 +106,7 @@ public class PostServiceImpl implements PostService {
 
             post.setMedia(media);
             post.setImageName(media.getFileName());
+            post.setCloudinaryUrl(media.getCloudinaryUrl());
 
         } else {
             post.setImageName(AppConstants.DEFAULT_IMAGE);
@@ -146,8 +148,17 @@ public class PostServiceImpl implements PostService {
 
             checkMediaOwnerOrAdmin(media);
 
+            // If replacing a direct uploaded post image, delete it from Cloudinary
+            if (post.getPublicId() != null && post.getMedia() == null) {
+                try {
+                    fileService.deleteImageFromCloudinary(post.getPublicId());
+                } catch (Exception ignored) {}
+                post.setPublicId(null);
+            }
+
             post.setMedia(media);
             post.setImageName(media.getFileName());
+            post.setCloudinaryUrl(media.getCloudinaryUrl());
         }
 
         Post updatedPost = postRepo.save(post);
@@ -167,6 +178,15 @@ public class PostServiceImpl implements PostService {
 
         checkPostOwnerOrAdmin(post);
 
+        // Delete direct post image from Cloudinary (not shared media)
+        if (post.getPublicId() != null && post.getMedia() == null) {
+            try {
+                fileService.deleteImageFromCloudinary(post.getPublicId());
+            } catch (Exception e) {
+                System.err.println("Warning: Could not delete post image from Cloudinary: " + e.getMessage());
+            }
+        }
+
         postRepo.delete(post);
     }
 
@@ -185,8 +205,13 @@ public class PostServiceImpl implements PostService {
         Pageable pageable = PageRequest.of(
                 pageNumber, pageSize, sort);
 
-        // Public listings return all published posts (including legacy posts where status was null)
-        Page<Post> pagePost = postRepo.findAllPublished(pageable);
+        // Admins see all posts across platform; public users see published posts only
+        Page<Post> pagePost;
+        if (isCurrentUserAdmin()) {
+            pagePost = postRepo.findAll(pageable);
+        } else {
+            pagePost = postRepo.findAllPublished(pageable);
+        }
 
         return createPostResponse(pagePost);
     }
@@ -260,7 +285,7 @@ public class PostServiceImpl implements PostService {
                 pageNumber, pageSize, sort);
 
         User currentUser = getCurrentUserOrNull();
-        boolean isOwnerOrAdmin = currentUser != null && (currentUser.getId() == userId || isCurrentUserAdmin());
+        boolean isOwnerOrAdmin = currentUser != null && (java.util.Objects.equals(currentUser.getId(), userId) || isCurrentUserAdmin());
 
         Page<Post> pagePost;
         if (isOwnerOrAdmin) {
@@ -275,8 +300,25 @@ public class PostServiceImpl implements PostService {
     // Search Published Posts
     @Override
     public List<PostDto> searchPosts(String keyword, Integer categoryId) {
+        List<Post> posts;
+        String cleanKeyword = (keyword != null) ? keyword.trim() : "";
 
-        List<Post> posts = postRepo.searchByCategoryAndTitle(categoryId, keyword);
+        if (cleanKeyword.isEmpty()) {
+            if (categoryId != null) {
+                Category cat = categoryRepo.findById(categoryId).orElse(null);
+                posts = (cat != null)
+                        ? postRepo.findByCategoryPublished(cat, PageRequest.of(0, 100)).getContent()
+                        : java.util.Collections.emptyList();
+            } else {
+                posts = postRepo.findAllPublished(PageRequest.of(0, 100)).getContent();
+            }
+        } else {
+            if (categoryId != null) {
+                posts = postRepo.searchByCategoryAndKeyword(categoryId, cleanKeyword);
+            } else {
+                posts = postRepo.searchByKeyword(cleanKeyword);
+            }
+        }
 
         return posts.stream()
                 .map(this::mapToPostDto)
@@ -294,10 +336,20 @@ public class PostServiceImpl implements PostService {
 
         checkPostOwnerOrAdmin(post);
 
-        String userFolder = "user_" + post.getUser().getId();
-        String fileName = fileService.uploadImage(path, userFolder, image);
+        // Delete old direct image from Cloudinary if replacing
+        if (post.getPublicId() != null && post.getMedia() == null) {
+            try {
+                fileService.deleteImageFromCloudinary(post.getPublicId());
+            } catch (Exception ignored) {}
+        }
 
-        post.setImageName(fileName);
+        String folder = "techverse/posts/user-" + post.getUser().getId();
+        com.om.blog.payloads.CloudinaryResponse uploadResult = fileService.uploadImageToCloudinary(image, folder);
+
+        post.setImageName(image.getOriginalFilename());
+        post.setCloudinaryUrl(uploadResult.secureUrl());
+        post.setPublicId(uploadResult.publicId());
+        post.setMedia(null);
 
         Post updatedPost = postRepo.save(post);
 
@@ -313,16 +365,39 @@ public class PostServiceImpl implements PostService {
                         new ResourceNotFoundException(
                                 "Post", "Post Id", postId));
 
+        // If Cloudinary URL is present, stream from URL
+        String cloudUrl = post.getCloudinaryUrl();
+        if ((cloudUrl == null || cloudUrl.isBlank()) && post.getMedia() != null) {
+            cloudUrl = post.getMedia().getCloudinaryUrl();
+        }
+
+        if (cloudUrl != null && !cloudUrl.isBlank()) {
+            try (InputStream in = new java.net.URI(cloudUrl).toURL().openStream()) {
+                byte[] imageData = in.readAllBytes();
+                String ext = cloudUrl.contains(".") ? cloudUrl.substring(cloudUrl.lastIndexOf(".") + 1).toLowerCase() : "jpg";
+                String contentType = switch (ext) {
+                    case "png" -> "image/png";
+                    case "gif" -> "image/gif";
+                    case "webp" -> "image/webp";
+                    default -> "image/jpeg";
+                };
+                return new PostImageResponse(imageData, contentType);
+            } catch (Exception e) {
+                // Fallback to local or default placeholder
+            }
+        }
+
         String fileName = post.getImageName();
         String userFolder = "user_" + post.getUser().getId();
 
-        InputStream inputStream = fileService.getResource(path, userFolder, fileName);
-
-        byte[] imageData = inputStream.readAllBytes();
-
-        String contentType = determineContentType(fileName);
-
-        return new PostImageResponse(imageData, contentType);
+        try {
+            InputStream inputStream = fileService.getResource(path, userFolder, fileName);
+            byte[] imageData = inputStream.readAllBytes();
+            String contentType = determineContentType(fileName);
+            return new PostImageResponse(imageData, contentType);
+        } catch (FileNotFoundException e) {
+            return new PostImageResponse(new byte[0], "image/png");
+        }
     }
 
     // Feature 1 & 7: Toggle Like and Get Count
@@ -488,10 +563,18 @@ public class PostServiceImpl implements PostService {
     // Helper: Map Post to PostDto with counts and user flags
     private PostDto mapToPostDto(Post post) {
         PostDto dto = modelMapper.map(post, PostDto.class);
+        if (post.getMedia() != null) {
+            dto.setMediaId(post.getMedia().getMediaId());
+        }
         dto.setShareCount(post.getShareCount());
         dto.setStatus(post.getStatus() != null ? post.getStatus() : "PUBLISHED");
         dto.setLikeCount(postLikeRepo.countByPost(post));
         dto.setBookmarkCount(postBookmarkRepo.countByPost(post));
+
+        // Inherit Cloudinary URL from associated Media if not set directly
+        if ((dto.getCloudinaryUrl() == null || dto.getCloudinaryUrl().isBlank()) && post.getMedia() != null) {
+            dto.setCloudinaryUrl(post.getMedia().getCloudinaryUrl());
+        }
 
         User currentUser = getCurrentUserOrNull();
         if (currentUser != null) {

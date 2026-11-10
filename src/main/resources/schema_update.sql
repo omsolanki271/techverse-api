@@ -59,3 +59,12 @@ CREATE TABLE IF NOT EXISTS author_subscriptions (
     CONSTRAINT fk_sub_subscriber FOREIGN KEY (subscriber_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_sub_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+-- ==========================================
+-- Cloudinary Migration Updates
+-- ==========================================
+ALTER TABLE media ADD COLUMN cloudinary_url VARCHAR(1000) NULL;
+ALTER TABLE media ADD COLUMN public_id VARCHAR(255) NULL;
+
+ALTER TABLE posts ADD COLUMN cloudinary_url VARCHAR(1000) NULL;
+ALTER TABLE posts ADD COLUMN public_id VARCHAR(255) NULL;

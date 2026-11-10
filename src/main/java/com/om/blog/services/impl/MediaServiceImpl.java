@@ -52,15 +52,16 @@ public class MediaServiceImpl implements MediaService {
 
         checkUserOwnerOrAdmin(user);
 
-        String userFolder = "user-" + userId;
-
-        String fileName = fileService.uploadImage(path,userFolder,file);
+        String folder = "techverse/media/user-" + userId;
+        com.om.blog.payloads.CloudinaryResponse uploadResult = fileService.uploadImageToCloudinary(file, folder);
 
         Media media = new Media();
 
-        media.setFileName(fileName);
+        media.setFileName(file.getOriginalFilename());
         media.setFileType(file.getContentType());
-        media.setFilePath(path + userFolder);
+        media.setFilePath(uploadResult.secureUrl());
+        media.setCloudinaryUrl(uploadResult.secureUrl());
+        media.setPublicId(uploadResult.publicId());
         media.setUploadedDate(LocalDateTime.now());
         media.setUser(user);
 
@@ -136,9 +137,19 @@ public class MediaServiceImpl implements MediaService {
                     ("Media cannot be deleted because it is currently used by one or more posts.");
         }
 
-        String userFolder = "user-" + media.getUser().getId();
-
-        fileService.deleteFile(path, userFolder, media.getFileName());
+        // Delete from Cloudinary if publicId is present
+        if (media.getPublicId() != null && !media.getPublicId().isBlank()) {
+            fileService.deleteImageFromCloudinary(media.getPublicId());
+        } else if (media.getFileName() != null && !media.getFileName().isBlank()) {
+            // Backward compatibility: Delete legacy local file if present
+            try {
+                String userFolder = "user-" + media.getUser().getId();
+                fileService.deleteFile(path, userFolder, media.getFileName());
+            } catch (Exception e) {
+                // Log and continue
+                System.err.println("Notice: Could not delete local file for media: " + e.getMessage());
+            }
+        }
 
         mediaRepo.delete(media);
     }
