@@ -4,7 +4,6 @@ import com.om.blog.entities.*;
 import com.om.blog.exceptions.ResourceAlreadyInUseException;
 import com.om.blog.exceptions.ResourceNotFoundException;
 import com.om.blog.payloads.UserDto;
-import com.om.blog.repositories.AuthorSubscriptionRepo;
 import com.om.blog.repositories.RoleRepo;
 import com.om.blog.repositories.UserFollowRepo;
 import com.om.blog.repositories.UserRepo;
@@ -40,9 +39,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserFollowRepo userFollowRepo;
-
-    @Autowired
-    private AuthorSubscriptionRepo authorSubscriptionRepo;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -194,52 +190,6 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
-    // Feature 3: Subscribe to Authors
-    @Transactional
-    @Override
-    public Map<String, Object> toggleSubscribe(Integer authorId) {
-        User author = userRepo.findById(authorId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", authorId));
-        User currentUser = getCurrentUser();
-        if (currentUser.getId() == author.getId()) {
-            throw new IllegalArgumentException("You cannot subscribe to yourself");
-        }
-
-        boolean subscribed;
-        var existing = authorSubscriptionRepo.findBySubscriberAndAuthor(currentUser, author);
-        if (existing.isPresent()) {
-            authorSubscriptionRepo.delete(existing.get());
-            subscribed = false;
-        } else {
-            authorSubscriptionRepo.save(new AuthorSubscription(currentUser, author));
-            subscribed = true;
-        }
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("subscribed", subscribed);
-        return response;
-    }
-
-    @Override
-    public Map<String, Object> getSubscribeStatus(Integer authorId) {
-        User author = userRepo.findById(authorId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "Id", authorId));
-        User currentUser = getCurrentUserOrNull();
-        boolean subscribed = currentUser != null && authorSubscriptionRepo.existsBySubscriberAndAuthor(currentUser, author);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("subscribed", subscribed);
-        return response;
-    }
-
-    @Override
-    public List<UserDto> getMySubscriptions() {
-        User currentUser = getCurrentUser();
-        return authorSubscriptionRepo.findBySubscriber(currentUser).stream()
-                .map(s -> userToDto(s.getAuthor()))
-                .toList();
-    }
-
     private User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
@@ -271,10 +221,8 @@ public class UserServiceImpl implements UserService {
         User currentUser = getCurrentUserOrNull();
         if (currentUser != null) {
             userDto.setFollowing(userFollowRepo.existsByFollowerAndFollowing(currentUser, user));
-            userDto.setSubscribed(authorSubscriptionRepo.existsBySubscriberAndAuthor(currentUser, user));
         } else {
             userDto.setFollowing(false);
-            userDto.setSubscribed(false);
         }
         return userDto;
     }

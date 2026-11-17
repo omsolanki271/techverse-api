@@ -97,8 +97,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/posts/*/view").permitAll()
                         .requestMatchers(
                                 "/api/posts/bookmarks/my-bookmarks",
-                                "/api/posts/drafts/my-drafts",
-                                "/api/users/subscriptions/my-subscriptions"
+                                "/api/posts/drafts/my-drafts"
                         ).authenticated()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/posts", "/api/posts/**",

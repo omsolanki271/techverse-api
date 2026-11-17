@@ -57,9 +57,5 @@ public class UserDto {
     private Boolean following = false;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonSetter(nulls = Nulls.SKIP)
-    private Boolean subscribed = false;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Role> roles;
 }

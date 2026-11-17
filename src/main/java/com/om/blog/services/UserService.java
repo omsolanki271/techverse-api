@@ -18,8 +18,4 @@ public interface UserService {
     List<UserDto> getFollowers(Integer userId);
     List<UserDto> getFollowing(Integer userId);
 
-    // Feature 3: Subscribe to Authors
-    Map<String, Object> toggleSubscribe(Integer authorId);
-    Map<String, Object> getSubscribeStatus(Integer authorId);
-    List<UserDto> getMySubscriptions();
 }

@@ -59,6 +59,9 @@ public class PostServiceImpl implements PostService {
     private PostLikeRepo postLikeRepo;
 
     @Autowired
+    private PostViewRepo postViewRepo;
+
+    @Autowired
     private PostBookmarkRepo postBookmarkRepo;
 
     @Value("${project.image}")
@@ -230,8 +233,7 @@ public class PostServiceImpl implements PostService {
         if ("DRAFT".equalsIgnoreCase(post.getStatus())) {
             checkPostOwnerOrAdmin(post);
         } else {
-            postRepo.incrementViews(postId);
-            post.setViews(post.getViews() + 1);
+            post = recordView(post);
         }
 
         return mapToPostDto(post);
@@ -247,10 +249,20 @@ public class PostServiceImpl implements PostService {
                                 "Post", "Post Id", postId));
 
         if (!"DRAFT".equalsIgnoreCase(post.getStatus())) {
-            postRepo.incrementViews(postId);
-            return post.getViews() + 1;
+            return recordView(post).getViews();
         }
         return post.getViews();
+    }
+
+    private Post recordView(Post post) {
+        User currentUser = getCurrentUserOrNull();
+        if (currentUser != null && !postViewRepo.existsByPostAndUser(post, currentUser)) {
+            postViewRepo.save(new PostView(post, currentUser));
+            postRepo.incrementViews(post.getPostId());
+            return postRepo.findById(post.getPostId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Post", "Post Id", post.getPostId()));
+        }
+        return post;
     }
 
     // Get Posts By Category (Published only)
@@ -445,9 +457,10 @@ public class PostServiceImpl implements PostService {
         var existing = postLikeRepo.findByPostAndUser(post, currentUser);
         if (existing.isPresent()) {
             postLikeRepo.delete(existing.get());
+            postLikeRepo.flush();
             liked = false;
         } else {
-            postLikeRepo.save(new PostLike(post, currentUser));
+            postLikeRepo.saveAndFlush(new PostLike(post, currentUser));
             liked = true;
         }
 

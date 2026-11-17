@@ -53,6 +53,9 @@ public class User implements UserDetails {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostView> postViews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Media> media = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)

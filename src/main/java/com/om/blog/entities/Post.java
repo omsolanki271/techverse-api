@@ -69,6 +69,9 @@ public class Post {
     private Set<PostLike> likes = new HashSet<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<PostView> viewsByUser = new HashSet<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<PostBookmark> bookmarks = new HashSet<>();
 
     @PrePersist

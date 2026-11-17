@@ -79,21 +79,4 @@ public class UserController {
         return ResponseEntity.ok(userService.getFollowing(userId));
     }
 
-    // Feature 3: Toggle Subscribe
-    @PostMapping("/{authorId}/subscribe")
-    public ResponseEntity<Map<String, Object>> toggleSubscribe(@PathVariable Integer authorId) {
-        return ResponseEntity.ok(userService.toggleSubscribe(authorId));
-    }
-
-    // Get Subscribe Status
-    @GetMapping("/{authorId}/subscribe-status")
-    public ResponseEntity<Map<String, Object>> getSubscribeStatus(@PathVariable Integer authorId) {
-        return ResponseEntity.ok(userService.getSubscribeStatus(authorId));
-    }
-
-    // Get Current User's Subscriptions
-    @GetMapping("/subscriptions/my-subscriptions")
-    public ResponseEntity<List<UserDto>> getMySubscriptions() {
-        return ResponseEntity.ok(userService.getMySubscriptions());
-    }
 }
