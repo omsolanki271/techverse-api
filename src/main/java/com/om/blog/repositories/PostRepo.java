@@ -84,6 +84,11 @@ public interface PostRepo extends JpaRepository<Post, Integer> {
             @Param("title") String title
     );
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("UPDATE Post p SET p.views = p.views + 1 WHERE p.postId = :postId")
+    int incrementViews(@Param("postId") Integer postId);
+
     @Modifying
     @Transactional
     @Query("UPDATE Post p SET p.status = 'PUBLISHED' WHERE p.status IS NULL OR p.status = ''")

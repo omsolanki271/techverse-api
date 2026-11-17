@@ -1,5 +1,7 @@
 package com.om.blog.payloads;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.om.blog.entities.Role;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -12,6 +14,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class UserDto {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer id;
 
     @NotBlank(message = "Name is required")
@@ -34,15 +37,28 @@ public class UserDto {
     private String githubUrl;
     private String linkedinUrl;
     private String instaUrl;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private String googleId;
     private LocalDateTime createdAt;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime updatedAt;
-    
-    private long followerCount = 0;
-    private long followingCount = 0;
-    private boolean following = false;
-    private boolean subscribed = false;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Long followerCount = 0L;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Long followingCount = 0L;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Boolean following = false;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonSetter(nulls = Nulls.SKIP)
+    private Boolean subscribed = false;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<Role> roles;

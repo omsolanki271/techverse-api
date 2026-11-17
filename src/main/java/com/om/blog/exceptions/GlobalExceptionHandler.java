@@ -66,6 +66,17 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        String msg = "Malformed JSON request or invalid data format.";
+        if (ex.getMessage() != null && ex.getMessage().contains("Cannot map null into type long")) {
+            msg = "Invalid numeric field value: cannot map null into primitive number.";
+        } else if (ex.getMostSpecificCause() != null && ex.getMostSpecificCause().getMessage() != null) {
+            msg = ex.getMostSpecificCause().getMessage();
+        }
+        return new ResponseEntity<>(new ApiResponse(msg, false), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
         String msg = "Database constraint violation. An account with this email or mobile number may already exist.";

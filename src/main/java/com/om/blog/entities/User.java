@@ -39,8 +39,6 @@ public class User implements UserDetails {
     private String linkedinUrl;
     @Column(name = "insta_url")
     private String instaUrl;
-    @Column(name = "google_id")
-    private String googleId;
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

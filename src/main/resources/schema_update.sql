@@ -1,12 +1,9 @@
--- TechVerse Schema Update Script
--- Database: blog_app_api
-
 USE blog_app_api;
 
 -- Users table updates
 ALTER TABLE users ADD COLUMN created_at DATETIME NULL;
 ALTER TABLE users ADD COLUMN updated_at DATETIME NULL;
-ALTER TABLE users ADD COLUMN google_id VARCHAR(255) NULL;
+ALTER TABLE users DROP COLUMN IF EXISTS google_id;
 
 -- Posts table updates (share counter & draft status)
 ALTER TABLE posts ADD COLUMN share_count INT DEFAULT 0;

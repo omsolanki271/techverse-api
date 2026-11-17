@@ -22,6 +22,9 @@ public interface PostService {
 
     PostDto getPostById(Integer postId);
 
+    // Atomically increment post view count
+    int incrementViews(Integer postId);
+
     // Get posts by category with pagination (published only)
     PostResponse getPostByCategory(Integer categoryId, Integer pageNumber, Integer pageSize , String sortBy , String sortDirection);
 
@@ -34,6 +37,9 @@ public interface PostService {
     PostDto uploadPostImage(Integer postId, MultipartFile image) throws IOException;
 
     PostImageResponse getPostImage(Integer postId) throws IOException;
+
+    // Get Post Image URL without incrementing views
+    String getPostImageUrl(Integer postId);
 
     // Feature 1 & 7: Like / Unlike & Count
     Map<String, Object> toggleLike(Integer postId);

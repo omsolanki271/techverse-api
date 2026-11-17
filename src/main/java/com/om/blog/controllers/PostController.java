@@ -208,17 +208,29 @@ public class PostController {
         }
     }
 
+    // Feature: Explicit Visit Tracking / Increment Post Views
+    @PostMapping("/{postId}/view")
+    public ResponseEntity<Map<String, Object>> incrementPostViews(
+            @PathVariable Integer postId) {
+
+        int updatedViews = postService.incrementViews(postId);
+
+        return ResponseEntity.ok(Map.of(
+                "postId", postId,
+                "views", updatedViews
+        ));
+    }
+
     // Get / Display Post Image
     @GetMapping("/image/{postId}")
     public ResponseEntity<?> downloadImage(
             @PathVariable Integer postId,
             HttpServletResponse response) throws IOException {
 
-        PostDto post = postService.getPostById(postId);
-
-        // If post has a Cloudinary URL, redirect directly
-        if (post.getCloudinaryUrl() != null && !post.getCloudinaryUrl().isBlank()) {
-            response.sendRedirect(post.getCloudinaryUrl());
+        // Check redirect without incrementing post views
+        String cloudUrl = postService.getPostImageUrl(postId);
+        if (cloudUrl != null && !cloudUrl.isBlank()) {
+            response.sendRedirect(cloudUrl);
             return null;
         }
 

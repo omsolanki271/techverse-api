@@ -217,6 +217,7 @@ public class PostServiceImpl implements PostService {
     }
 
     // Get Post By ID
+    @Transactional
     @Override
     public PostDto getPostById(Integer postId) {
 
@@ -229,11 +230,27 @@ public class PostServiceImpl implements PostService {
         if ("DRAFT".equalsIgnoreCase(post.getStatus())) {
             checkPostOwnerOrAdmin(post);
         } else {
+            postRepo.incrementViews(postId);
             post.setViews(post.getViews() + 1);
-            postRepo.save(post);
         }
 
         return mapToPostDto(post);
+    }
+
+    // Atomically increment post view count
+    @Transactional
+    @Override
+    public int incrementViews(Integer postId) {
+        Post post = postRepo.findById(postId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Post", "Post Id", postId));
+
+        if (!"DRAFT".equalsIgnoreCase(post.getStatus())) {
+            postRepo.incrementViews(postId);
+            return post.getViews() + 1;
+        }
+        return post.getViews();
     }
 
     // Get Posts By Category (Published only)
@@ -398,6 +415,19 @@ public class PostServiceImpl implements PostService {
         } catch (FileNotFoundException e) {
             return new PostImageResponse(new byte[0], "image/png");
         }
+    }
+
+    @Override
+    public String getPostImageUrl(Integer postId) {
+        Post post = postRepo.findById(postId).orElse(null);
+        if (post == null) return null;
+        if (post.getCloudinaryUrl() != null && !post.getCloudinaryUrl().isBlank()) {
+            return post.getCloudinaryUrl();
+        }
+        if (post.getMedia() != null && post.getMedia().getCloudinaryUrl() != null && !post.getMedia().getCloudinaryUrl().isBlank()) {
+            return post.getMedia().getCloudinaryUrl();
+        }
+        return null;
     }
 
     // Feature 1 & 7: Toggle Like and Get Count
@@ -566,6 +596,7 @@ public class PostServiceImpl implements PostService {
         if (post.getMedia() != null) {
             dto.setMediaId(post.getMedia().getMediaId());
         }
+        dto.setViews(post.getViews());
         dto.setShareCount(post.getShareCount());
         dto.setStatus(post.getStatus() != null ? post.getStatus() : "PUBLISHED");
         dto.setLikeCount(postLikeRepo.countByPost(post));

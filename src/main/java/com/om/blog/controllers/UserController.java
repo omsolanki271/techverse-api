@@ -22,7 +22,6 @@ public class UserController {
 
     // POST - create user
     @PostMapping("/")
-    @PostMapping({"", "/"})
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
         UserDto dto = userService.createUser(userDto);
         return new ResponseEntity<>(dto, HttpStatus.CREATED);
