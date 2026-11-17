@@ -49,6 +49,9 @@ public class UserServiceImpl implements UserService {
         if (userDto.getPassword() == null || userDto.getPassword().isBlank()) {
             throw new IllegalArgumentException("Password is required");
         }
+        if (userDto.getEmail() != null && userRepo.existsByEmail(userDto.getEmail().trim())) {
+            throw new ResourceAlreadyInUseException("Email is already registered. Please sign in instead.");
+        }
         if (userDto.getMobileNumber() != null && !userDto.getMobileNumber().isBlank()) {
             if (userRepo.existsByMobileNumber(userDto.getMobileNumber())) {
                 throw new ResourceAlreadyInUseException("Mobile number is already registered");

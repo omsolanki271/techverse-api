@@ -7,4 +7,5 @@ public interface UserRepo extends JpaRepository<User,Integer> {
     Optional<User> findByGoogleId(String googleId);
     Optional<User> findByMobileNumber(String mobileNumber);
     boolean existsByMobileNumber(String mobileNumber);
+    boolean existsByEmail(String email);
 }

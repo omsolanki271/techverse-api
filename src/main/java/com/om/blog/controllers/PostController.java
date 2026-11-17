@@ -225,6 +225,10 @@ public class PostController {
         // Backward compatibility for legacy local images
         PostImageResponse image = postService.getPostImage(postId);
 
+        if (image == null || image.imageData() == null || image.imageData().length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(image.contentType()))
                 .body(image.imageData());

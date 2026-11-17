@@ -66,5 +66,25 @@ public class GlobalExceptionHandler{
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex) {
+        String msg = "Database constraint violation. An account with this email or mobile number may already exist.";
+        if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("email")) {
+            msg = "Email address is already registered. Please sign in instead.";
+        } else if (ex.getMessage() != null && ex.getMessage().toLowerCase().contains("mobile")) {
+            msg = "Mobile number is already registered.";
+        }
+        return new ResponseEntity<>(new ApiResponse(msg, false), HttpStatus.BAD_REQUEST);
+    }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return new ResponseEntity<>(new ApiResponse(ex.getMessage(), false), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse> handleGlobalException(Exception ex) {
+        String msg = (ex.getMessage() != null && !ex.getMessage().isBlank()) ? ex.getMessage() : "An unexpected server error occurred.";
+        return new ResponseEntity<>(new ApiResponse(msg, false), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }
